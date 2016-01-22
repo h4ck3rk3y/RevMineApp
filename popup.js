@@ -99,8 +99,10 @@ document.addEventListener('DOMContentLoaded', function() {
       		var row = table.insertRow(i);
       		var cell0 = row.insertCell(0);
       		var cell1 = row.insertCell(1);
+      		var cell2 = row.insertCell(2);
       		cell0.innerHTML = key;
       		cell1.innerHTML = result[key];
+      		cell2.innerHTML = 'Lorem ipsum. Lets win this thing.'
       		var i = i + 1;
       	}
       }
