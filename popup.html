@@ -1,0 +1,28 @@
+<!doctype html>
+<!--
+ This page is shown when the extension button is clicked, because the
+ "browser_action" field in manifest.json contains the "default_popup" key with
+ value "popup.html".
+ -->
+<html>
+  <head>
+    <title>Revmine</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="popup.js"></script>
+  </head>
+  <body>
+    <!-- <div id="status"></div> -->
+    <img id="image-result" hidden>
+    <table class="table-fill" id='rev-table'>
+		<thead>
+			<tr>
+				<th class="text-left">Topic</th>
+				<th class="text-left">Rating</th>
+			</tr>
+		</thead>
+		<tbody class="table-hover" id='data'>
+		</tbody>
+	</table>
+  </body>
+</html>
+
