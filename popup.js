@@ -59,7 +59,16 @@ function getProductDetails(searchTerm, callback, errorCallback) {
   // https://developers.google.com/image-search/
   var parser = document.createElement('a');
   parser.href = searchTerm;
-  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + parser.pathname.split('/')[3]
+  var pat = /\/(B[A-Z0-9]{8,9})$/
+  var pid = 'BOGUS'
+  if (pat.test(parser.pathname)){
+    pid = pat.exec(parser.pathname)[1];
+  }
+  else {
+    pat = /\/(B[A-Z0-9]{8,9})[\/\?]/
+    pid = pat.exec(parser.pathname) || 'BOGUS'
+  }
+  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pat.exec(parser.pathname)[1]
   console.log(searchUrl)
   var x = new XMLHttpRequest();
   x.open('GET', searchUrl);
@@ -73,11 +82,12 @@ function getProductDetails(searchTerm, callback, errorCallback) {
       errorCallback('Product not in DataBase?');
       return;
     }
-    callback(response.result);
+    callback(response.result,response.status);
   };
   x.onerror = function() {
     errorCallback('Network error.');
   };
+  setTimeout(function(){if (document.getElementById('status').textContent!=''){renderStatus('Product is new for us, processing..');document.getElementById('prog').style.display=''};}, 6000)
   x.send();
 }
 
@@ -86,25 +96,32 @@ function renderStatus(statusText) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+
   getCurrentTabUrl(function(url) {
     // Put the image URL in Google search.
-    // renderStatus('Performing Google Image search for ' + url);
-
-    getProductDetails(url, function(result) {
-
-      var table = document.getElementById('rev-table');
-      var i = 1
-      for (var key in result) {
-      	if (result.hasOwnProperty(key)) {
-      		var row = table.insertRow(i);
-      		var cell0 = row.insertCell(0);
-      		var cell1 = row.insertCell(1);
-      		var cell2 = row.insertCell(2);
-      		cell0.innerHTML = key;
-      		cell1.innerHTML = result[key];
-      		cell2.innerHTML = 'Lorem ipsum. Lets win this thing.'
-      		var i = i + 1;
-      	}
+    renderStatus('Fetching the Reviews For the Product...');
+    getProductDetails(url, function(result,status) {
+      document.getElementById('prog').style.display='none'
+      if (status==200){
+        renderStatus('');
+        var table = document.getElementById('rev-table');
+        table.tHead.style.display =''
+        var i = 1
+        for (var key in result) {
+        	if (result.hasOwnProperty(key) && key!='_id' && key!='domain') {
+        		var row = table.insertRow(i);
+        		var cell0 = row.insertCell(0);
+        		var cell1 = row.insertCell(1);
+        		var cell2 = row.insertCell(2);
+        		cell0.innerHTML = key;
+        		cell1.innerHTML = result[key];
+        		cell2.innerHTML = 'Lorem ipsum. Lets win this thing.'
+        		var i = i + 1;
+        	}
+        }
+      }
+      else {
+        renderStatus('Something Went Wrong...')
       }
       // Explicitly set the width/height to minimize the number of reflows. For
       // a single image, this does not matter, but if you're going to embed
@@ -116,3 +133,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
+
+

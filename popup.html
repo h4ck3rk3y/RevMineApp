@@ -4,26 +4,41 @@
  "browser_action" field in manifest.json contains the "default_popup" key with
  value "popup.html".
  -->
-<html>
+<html style="min-width:600px">
   <head>
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
     <title>Revmine</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="popup.js"></script>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  	<!--Import materialize.css-->
+  	<link type="text/css" rel="stylesheet" href="css/materialize.css"  media="screen,projection"/>
+
+  <script src="popup.js"></script>
   </head>
   <body>
-    <!-- <div id="status"></div> -->
-    <img id="image-result" hidden>
-    <table class="table-fill" id='rev-table'>
-		<thead>
-			<tr>
-				<th class="text-left">Topic</th>
-				<th class="text-left">Rating</th>
-				<th class="text-left">Sentence</th>
-			</tr>
-		</thead>
-		<tbody class="table-hover" id='data'>
-		</tbody>
-	</table>
+  	<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="js/materialize.min.js"></script>
+    <div class="row">
+      <div class="col s12">
+        <div class="progress" id='prog' style:"display: none;">
+          <div class="indeterminate"></div>
+        </div>
+        <p id="status" class='flow-text'></p>
+    	  <table id='rev-table' class='striped'>
+    			<thead style="display:none">
+    				<tr>
+    					<th >Topic</th>
+    					<th >Rating</th>
+    					<th >Sentence</th>
+    				</tr>
+    			</thead>
+    			<tbody id='data' >
+    			      <tr>
+    	                </tr>
+    			</tbody>
+    		</table>
+  		</div>
+    </div>
   </body>
 </html>
 
