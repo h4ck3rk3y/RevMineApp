@@ -78,7 +78,7 @@ function getProductDetails(searchTerm, callback, errorCallback) {
   x.onerror = function() {
     errorCallback('Network error.');
   };
-  setTimeout(function(){if (document.getElementById('status').textContent!=''){renderStatus('Mining Reviews as object not in Database, may take around 20 seconds.')};}, 6000)
+  setTimeout(function(){if (document.getElementById('status').textContent!=''){renderStatus('Product is new for us, processing..');document.getElementById('prog').style.display=''};}, 6000)
   x.send();
 }
 
@@ -91,6 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Put the image URL in Google search.
     renderStatus('Fetching the Reviews For the Product...');
     getProductDetails(url, function(result,status) {
+      document.getElementById('prog').style.display='none'
       if (status==200){
         renderStatus('');
         var table = document.getElementById('rev-table');

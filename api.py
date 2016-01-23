@@ -20,6 +20,7 @@ def getRatings(domain,pid):
     Retrieve, update or delete note instances.
     """
     foo = db.result.find({'_id' : pid, 'domain' :domain })
+    print foo.count()
     if not foo.count() > 0:
         try:
             foo = create_rev_natak(domain,pid)
