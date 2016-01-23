@@ -4,7 +4,7 @@
  "browser_action" field in manifest.json contains the "default_popup" key with
  value "popup.html".
  -->
-<html>
+<html style="min-width:600px">
   <head>
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
     <title>Revmine</title>
@@ -18,23 +18,24 @@
   <body>
   	<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
     <script type="text/javascript" src="js/materialize.min.js"></script>
-    <div id="status"></div>
-    <!-- <img id="image-result" hidden> -->
-        <!-- <div class='col s12'> -->
-		    <table id='rev-table' class='responsive-table'>
-				<thead style="display:none">
-					<tr>
-						<th >Topic</th>
-						<th >Rating</th>
-						<th >Sentence</th>
-					</tr>
-				</thead>
-				<tbody id='data' >
-				      <tr>
-		                </tr>
-				</tbody>
-			</table>
-		<!-- </div> -->
+    <div class="row">
+      <div class="col s12">
+        <p id="status" class='flow-text'></p>
+    	  <table id='rev-table' class='striped'>
+    			<thead style="display:none">
+    				<tr>
+    					<th >Topic</th>
+    					<th >Rating</th>
+    					<th >Sentence</th>
+    				</tr>
+    			</thead>
+    			<tbody id='data' >
+    			      <tr>
+    	                </tr>
+    			</tbody>
+    		</table>
+  		</div>
+    </div>
   </body>
 </html>
 

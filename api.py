@@ -9,6 +9,7 @@ db = client.revmine
 
 def create_rev_natak(domain, pid):
     """
+        add shubhus code here...
     """
     time.sleep(15)
     return [{'result': {'f': 1}, 'status':200}]
@@ -20,8 +21,10 @@ def getRatings(domain,pid):
     """
     foo = db.result.find({'_id' : pid, 'domain' :domain })
     if not foo.count() > 0:
-        foo = create_rev_natak(domain,pid)
-    print foo[0]
+        try:
+            foo = create_rev_natak(domain,pid)
+        except:
+            return {'status':100, 'result':100}
     return {'result': foo[0], 'status': 200}
 
 if __name__ == "__main__":

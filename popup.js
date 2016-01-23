@@ -78,7 +78,7 @@ function getProductDetails(searchTerm, callback, errorCallback) {
   x.onerror = function() {
     errorCallback('Network error.');
   };
-  setTimeout(function(){renderStatus('Mining Reviews as object not in Database, may take around 20 seconds.')}, 6000)
+  setTimeout(function(){if (document.getElementById('status').textContent!=''){renderStatus('Mining Reviews as object not in Database, may take around 20 seconds.')};}, 6000)
   x.send();
 }
 
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
         table.tHead.style.display =''
         var i = 1
         for (var key in result) {
-        	if (result.hasOwnProperty(key)) {
+        	if (result.hasOwnProperty(key) && key!='_id' && key!='domain') {
         		var row = table.insertRow(i);
         		var cell0 = row.insertCell(0);
         		var cell1 = row.insertCell(1);
