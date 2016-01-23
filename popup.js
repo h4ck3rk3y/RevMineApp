@@ -59,7 +59,16 @@ function getProductDetails(searchTerm, callback, errorCallback) {
   // https://developers.google.com/image-search/
   var parser = document.createElement('a');
   parser.href = searchTerm;
-  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + parser.pathname.split('/')[3]
+  var pat = /\/(B[A-Z0-9]{8,9})$/
+  var pid = 'BOGUS'
+  if (pat.test(parser.pathname)){
+    pid = pat.exec(parser.pathname)[1];
+  }
+  else {
+    pat = /\/(B[A-Z0-9]{8,9})[\/\?]/
+    pid = pat.exec(parser.pathname) || 'BOGUS'
+  }
+  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pat.exec(parser.pathname)[1]
   console.log(searchUrl)
   var x = new XMLHttpRequest();
   x.open('GET', searchUrl);
@@ -87,6 +96,7 @@ function renderStatus(statusText) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+
   getCurrentTabUrl(function(url) {
     // Put the image URL in Google search.
     renderStatus('Fetching the Reviews For the Product...');
@@ -123,3 +133,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
+
+

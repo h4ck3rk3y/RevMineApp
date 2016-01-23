@@ -4,14 +4,15 @@ from pymongo import MongoClient
 import time
 
 app = FlaskAPI(__name__)
-client = MongoClient('mongodb://172.17.30.113:27017/')
+client = MongoClient('mongodb://192.168.150.8:27017/')
 db = client.revmine
 
 def create_rev_natak(domain, pid):
     """
         add shubhus code here...
     """
-    time.sleep(15)
+    print "sleeping"
+    time.sleep(2)
     return [{'result': {'f': 1}, 'status':200}]
 
 @app.route("/<domain>/<pid>", methods=['GET'])
