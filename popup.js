@@ -77,12 +77,11 @@ function getProductDetails(searchTerm, callback, errorCallback) {
   x.onload = function() {
     // Parse and process the response from Google Image Search.
     var response = x.response;
-    console.log(response)
     if (!response) {
-      errorCallback('Product not in DataBase?');
+      errorCallback('Something went wrong. Contact @h4ck3rk3y?');
       return;
     }
-    callback(response.result,response.status);
+    callback(response.result,response.status,response.reviews);
   };
   x.onerror = function() {
     errorCallback('Network error.');
@@ -100,25 +99,43 @@ document.addEventListener('DOMContentLoaded', function() {
   getCurrentTabUrl(function(url) {
     // Put the image URL in Google search.
     renderStatus('Fetching the Reviews For the Product...');
-    getProductDetails(url, function(result,status) {
+    getProductDetails(url, function(result,status, reviews) {
       document.getElementById('prog').style.display='none'
       if (status==200){
         renderStatus('');
-        var table = document.getElementById('rev-table');
-        table.tHead.style.display =''
-        var i = 1
+        var table = document.getElementById('canvas');
+        canvas.style.display='';
+        var ctx = document.getElementById("canvas").getContext("2d");
+        var barChartData ={}
+        barChartData.labels = []
+        barChartData.datasets= []
+        barChartData.datasets.push({fillColor : "rgba(51,178,63,0.5)",strokeColor : "rgba(51,178,63,0.8)",highlightFill: "rgba(51,178,63,0.75)"
+      ,highlightStroke: "rgba(51,178,63,1)"});
+        barChartData.datasets[0].data = []
+        var i = 1;
         for (var key in result) {
         	if (result.hasOwnProperty(key) && key!='_id' && key!='domain') {
-        		var row = table.insertRow(i);
-        		var cell0 = row.insertCell(0);
-        		var cell1 = row.insertCell(1);
-        		var cell2 = row.insertCell(2);
-        		cell0.innerHTML = key;
-        		cell1.innerHTML = result[key];
-        		cell2.innerHTML = 'Lorem ipsum. Lets win this thing.'
-        		var i = i + 1;
-        	}
+        	 barChartData.labels.push(key);
+           barChartData.datasets[0].data.push(result[key])
+          }
         }
+        window.myBar = new Chart(ctx).Bar(barChartData, {
+          responsive : true
+        });
+        console.log(reviews);
+        var $mq = $('#anim');
+
+        function showRandomMarquee() {
+          var rannum = Math.floor(Math.random()*reviews.length);
+          $mq
+            .marquee('destroy')
+            .bind('finished', function(){document.getElementById('anim').innerHTML = reviews[rannum];
+          setTimeout(function(){showRandomMarquee()},2000);})
+            .html(reviews[rannum])
+            .marquee({duration: 250, direction:'down'});
+        }
+
+        showRandomMarquee();
       }
       else {
         renderStatus('Something Went Wrong...')
@@ -133,5 +150,3 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
-
-

@@ -4,7 +4,7 @@ from pymongo import MongoClient
 import time
 
 app = FlaskAPI(__name__)
-client = MongoClient('mongodb://192.168.150.8:27017/')
+client = MongoClient('mongodb://172.17.30.113:27017/')
 db = client.revmine
 
 def create_rev_natak(domain, pid):
@@ -12,8 +12,7 @@ def create_rev_natak(domain, pid):
         add shubhus code here...
     """
     print "sleeping"
-    time.sleep(2)
-    return [{'result': {'f': 1}, 'status':200}]
+    return {'result': {'f': 1}, 'status':200, 'reviews':['shit phone', 'very shitty phone']}
 
 @app.route("/<domain>/<pid>", methods=['GET'])
 def getRatings(domain,pid):
@@ -21,13 +20,13 @@ def getRatings(domain,pid):
     Retrieve, update or delete note instances.
     """
     foo = db.result.find({'_id' : pid, 'domain' :domain })
-    print foo.count()
     if not foo.count() > 0:
         try:
             foo = create_rev_natak(domain,pid)
         except:
             return {'status':100, 'result':100}
-    return {'result': foo[0], 'status': 200}
+    time.sleep(2)
+    return {'result': foo[0], 'status': 200, 'reviews':['shit phone', 'very shitty phone']}
 
 if __name__ == "__main__":
     app.run(debug=True)
