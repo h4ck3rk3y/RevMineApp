@@ -12,7 +12,7 @@ def create_rev_natak(domain, pid):
         add shubhus code here...
     """
     print "sleeping"
-    return {'result': {'f': 1}, 'status':200, 'reviews':['shit phone', 'very shitty phone']}
+    return [{'result': {'f': 1}, 'status':200, 'reviews':['shit phone', 'very shitty phone'],'valid':0}]
 
 @app.route("/<domain>/<pid>", methods=['GET'])
 def getRatings(domain,pid):
@@ -24,9 +24,12 @@ def getRatings(domain,pid):
         try:
             foo = create_rev_natak(domain,pid)
         except:
-            return {'status':100, 'result':100}
+            return {'status':69, 'result':100, 'reviews':['Not Applicable']}
     time.sleep(2)
-    return {'result': foo[0], 'status': 200, 'reviews':['shit phone', 'very shitty phone']}
+    if foo[0]['valid']==1:
+        return {'result': foo[0]['topics'], 'reviews':foo[0]['sentences'], 'status':200}
+    else:
+        return {'status': 100, 'reviews':['Not Applicable'], 'result': 100}
 
 if __name__ == "__main__":
     app.run(debug=True)

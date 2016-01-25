@@ -11,8 +11,9 @@
     <!-- <link rel="stylesheet" href="style.css"> -->
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   	<!--Import materialize.css-->
-  	<link type="text/css" rel="stylesheet" href="css/materialize.css"  media="screen,projection"/>
+  	<link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
   	<link type="text/css" rel="stylesheet" href="css/marquee.css">
+  	<link type="text/css" rel="stylesheet" href="css/dark.css">
   	<script src="js/Chart.min.js"></script>
   	<script src="js/jquery-2.1.1.min.js"></script>
   	<script src="js/jquery.marquee.min.js"></script>
@@ -20,7 +21,11 @@
   	<script type="text/javascript" src="js/materialize.min.js"></script>
   </head>
   <body>
-  <h1 class="flow-text" align="center">RevMine<sup>&reg;</sup></h1>
+  <div align="right">
+    <input type="checkbox" id="light_mode" class="cbx hidden"/>
+    <label for="light_mode"><font size="6">&#9728;</font></label>
+  </div>
+  <div class="flow-text" align="center">RevMine<sup>&reg;</sup></div>
   	<div class="row">
       <div class="col s12">
         <div class="progress" id='prog' style:"display: none;">
@@ -30,10 +35,9 @@
 	  </div>
   	  <canvas id="canvas" height="250" width="500" style="display: none;"></canvas>
   	  <br>
-  	  <div class = "flow-text marquee" id='anim' align="center">
-  	  </div>
+  	  <div class = "flow-text marquee" id='anim' align="center"></div>
     </div>
-    <footer align="center">Made with &#10084; in BITS Pilani by EvolvingLegends<sup>&copy;</sup></footer>
+    <footer align="center">Made with &#10084; in BITS Pilani by EvolvingLegends <sup>&copy;</sup> 2016</footer>
   </body>
 </html>
 

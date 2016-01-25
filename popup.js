@@ -60,15 +60,19 @@ function getProductDetails(searchTerm, callback, errorCallback) {
   var parser = document.createElement('a');
   parser.href = searchTerm;
   var pat = /\/(B[A-Z0-9]{8,9})$/
+  var isbn_pat = /\/([0-9]{9})/
   var pid = 'BOGUS'
   if (pat.test(parser.pathname)){
     pid = pat.exec(parser.pathname)[1];
   }
+  else if(isbn_pat.test(parser.pathname)){
+    pid = isbn_pat.exec(parser.pathname)[1].toString();
+  }
   else {
     pat = /\/(B[A-Z0-9]{8,9})[\/\?]/
-    pid = pat.exec(parser.pathname) || 'BOGUS'
+    pid = pat.exec(parser.pathname)[1] || 'BOGUS'
   }
-  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pat.exec(parser.pathname)[1]
+  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pid
   console.log(searchUrl)
   var x = new XMLHttpRequest();
   x.open('GET', searchUrl);
@@ -86,7 +90,7 @@ function getProductDetails(searchTerm, callback, errorCallback) {
   x.onerror = function() {
     errorCallback('Network error.');
   };
-  setTimeout(function(){if (document.getElementById('status').textContent!=''){renderStatus('Product is new for us, processing..');document.getElementById('prog').style.display=''};}, 6000)
+  setTimeout(function(){if (document.getElementById('status').textContent=='Fetching insights for the product...'){renderStatus('Product is new for us, processing..');document.getElementById('prog').style.display=''};}, 6000)
   x.send();
 }
 
@@ -98,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   getCurrentTabUrl(function(url) {
     // Put the image URL in Google search.
-    renderStatus('Fetching the Reviews For the Product...');
+    renderStatus('Fetching insights for the product...');
     getProductDetails(url, function(result,status, reviews) {
       document.getElementById('prog').style.display='none'
       if (status==200){
@@ -130,12 +134,15 @@ document.addEventListener('DOMContentLoaded', function() {
           $mq
             .marquee('destroy')
             .bind('finished', function(){document.getElementById('anim').innerHTML = reviews[rannum];
-          setTimeout(function(){showRandomMarquee()},2000);})
+          setTimeout(function(){showRandomMarquee()},4000);})
             .html(reviews[rannum])
             .marquee({duration: 250, direction:'down'});
         }
 
         showRandomMarquee();
+      }
+      else if(status==100) {
+        renderStatus('Not enough reviews on the product...One day though?')
       }
       else {
         renderStatus('Something Went Wrong...')
@@ -149,4 +156,18 @@ document.addEventListener('DOMContentLoaded', function() {
       renderStatus('Cannot display ratings. ' + errorMessage);
     });
   });
+});
+
+$(document).ready(function() {
+    //set initial state.
+    $('#light_mode').change(function() {
+        if($(this).is(":checked")) {
+            $("body").css("background",'rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box');
+            $("body").css("color","rgba(0, 0, 0, 0.870588)");
+        }
+        else{
+            $("body").css("background","#1a1a1a")
+            $("body").css("color","#eaeaea")
+        }
+    });
 });

@@ -1,9 +1,5 @@
 .marquee {
   width: 500px;
   overflow: hidden;
-}
-body{
-  background: #1a1a1a;
-  color : #eaeaea;
-  padding : 10px;
+  height: auto;
 }
