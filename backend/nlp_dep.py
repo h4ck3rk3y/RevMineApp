@@ -3,6 +3,7 @@ from pymongo import MongoClient
 import nltk
 from nltk.tag.perceptron import PerceptronTagger
 import enchant
+from pprint import pprint
 eng_check = enchant.Dict("en_US")
 tagger = PerceptronTagger()
 tagset = None
@@ -27,12 +28,13 @@ stop.append('amazon')
 stop.append('question')
 stop.append('one')
 stop.append('plus')
+stop.append('thanks')
 
 def strip_proppers_POS(text):
     tokens = nltk.word_tokenize(text)
     tagged = nltk.tag._pos_tag(tokens,tagset, tagger)
     res = []
-    words = [(word,pos) for word,pos in tagged if (pos[0]=="N" or pos[0]=="J") and len(word)>3 and word not in stop and eng_check.check(word)]
+    words = [(word,pos) for word,pos in tagged if (pos[0]=="N" or pos[0]=="J") and len(word)>3 and word not in stop and eng_check.check(word) and not any(ccc.isdigit() for ccc in word)]
     word_serial = {}
     for w in range(0,len(words),1):
         word_serial[words[w][0]] = w
@@ -64,7 +66,7 @@ def doit(pid):
     title = nltk.word_tokenize(i['title'].lower())
     for y in title:
         stop.append(y)
-    for j in range(1,min(len(i)-2,20)):
+    for j in range(1,min(len(i)-2,50)):
         sents = nltk.sent_tokenize(i[str(j)]['text'].lower())
         link = i[str(j)]['link']
         for sent in sents:

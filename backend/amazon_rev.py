@@ -19,7 +19,7 @@ def main(pid):
         doit(pid)
 
 def extract_text(li):
-    for page in range(1,3):
+    for page in range(1,6):
         # Page 1 soup!
         url_ = amazon_link % (li["_id"], page)
         mila = False
