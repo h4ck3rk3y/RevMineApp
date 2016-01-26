@@ -75,6 +75,7 @@ function getProductDetails(searchTerm, callback, errorCallback) {
   var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pid
   console.log(searchUrl)
   var x = new XMLHttpRequest();
+  x.timeout = 400000;
   x.open('GET', searchUrl);
   // The Google image search API responds with JSON, so let Chrome parse it.
   x.responseType = 'json';
