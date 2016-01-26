@@ -2,6 +2,8 @@ from __future__ import division
 from pymongo import MongoClient
 import nltk
 from nltk.tag.perceptron import PerceptronTagger
+import enchant
+eng_check = enchant.Dict("en_US")
 tagger = PerceptronTagger()
 tagset = None
 
@@ -30,7 +32,7 @@ def strip_proppers_POS(text):
     tokens = nltk.word_tokenize(text)
     tagged = nltk.tag._pos_tag(tokens,tagset, tagger)
     res = []
-    words = [(word,pos) for word,pos in tagged if (pos[0]=="N" or pos[0]=="J") and len(word)>3 and word not in stop]
+    words = [(word,pos) for word,pos in tagged if (pos[0]=="N" or pos[0]=="J") and len(word)>3 and word not in stop and eng_check.check(word)]
     word_serial = {}
     for w in range(0,len(words),1):
         word_serial[words[w][0]] = w
@@ -62,11 +64,12 @@ def doit(pid):
     title = nltk.word_tokenize(i['title'].lower())
     for y in title:
         stop.append(y)
-    for j in range(1,min(len(i),20)):
-        sents = nltk.sent_tokenize(i[str(j)].lower())
+    for j in range(1,min(len(i)-2,20)):
+        sents = nltk.sent_tokenize(i[str(j)]['text'].lower())
+        link = i[str(j)]['link']
         for sent in sents:
             arr.append(strip_proppers_POS(sent))
-            revs.append(sent)
+            revs.append((sent,link))
     noun_scores = {}
     neg_noun_scores = {}
     revsSelected = []
@@ -113,7 +116,8 @@ def doit(pid):
                 else:
                     neg_noun_scores[noun] += dist*neg_score
             if score+neg_score > 0.0 and dist :
-                individualReview = revs[yolo]
+                individualReview = revs[yolo][0]
+                individualLink = revs[yolo][1]
                 try:
                     index = individualReview.index(noun)
                     start = max(0,index-25)
@@ -122,9 +126,9 @@ def doit(pid):
                             start = st+1
                             break
                     selectedPartOfReview = individualReview[start:min(len(individualReview),index+25)]
-                    revsSelected.append(selectedPartOfReview)
+                    revsSelected.append((selectedPartOfReview,individualLink))
                 except:
-                    revsSelected.append(adj+" "+noun)
+                    revsSelected.append((adj+" "+noun,"www.google.com"))
     noun_scores = sorted(noun_scores.items(),key=lambda x:x[1][1],reverse=True)
     ns = {}
     for n_s in noun_scores:
@@ -151,8 +155,8 @@ def doit(pid):
 
         for i in topics:
             for s in revsSelected:
-                if i in s:
-                    valid_sents.append(s)
+                if i in s[0]:
+                    valid_sents.append("""<a href="https://amazon.in%s" target="_blank">%s[more]</a>"""%(s[1],s[0]))
 
         result['sentences'] = list(set(valid_sents))
     # print result

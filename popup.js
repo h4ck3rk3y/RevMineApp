@@ -140,6 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .marquee({duration: 250, direction:'down'});
         }
 
+
         showRandomMarquee();
       }
       else if(status==100) {

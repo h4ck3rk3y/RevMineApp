@@ -22,6 +22,7 @@ def extract_text(li):
     for page in range(1,3):
         # Page 1 soup!
         url_ = amazon_link % (li["_id"], page)
+        mila = False
         print "Trying " + url_ + " now!"
         while(1):
             try:
@@ -29,15 +30,24 @@ def extract_text(li):
                 response = requests.get(url_)
                 print 'downloaded'
                 if response.status_code==200:
+                    mila = True
+                    print 'yes'
                     soup = BeautifulSoup(response.text)
                     break
             except:
                 continue
+        if not mila:
+            continue
         li['title'] = soup('span', {'class': 'a-text-ellipsis'})[0].a.text
 
         # will scrape reviews' text
         for j, row in enumerate(soup('span', {'class': 'review-text'})):
-            li[str((page-1)*10 + (j + 1))] = row.text
+            li[str((page-1)*10 + (j + 1))] = {}
+            li[str((page-1)*10 + (j + 1))]['text'] = row.text
+
+        for j, row in enumerate(soup('a', {'class': 'a-size-base a-link-normal review-title a-color-base a-text-bold'})):
+            li[str((page-1)*10 + (j + 1))]['link'] = row['href']
+
 
     return li
 
