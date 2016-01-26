@@ -4,41 +4,40 @@
  "browser_action" field in manifest.json contains the "default_popup" key with
  value "popup.html".
  -->
-<html style="min-width:600px">
+<html style="min-width:500px">
   <head>
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
     <title>Revmine</title>
     <!-- <link rel="stylesheet" href="style.css"> -->
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   	<!--Import materialize.css-->
-  	<link type="text/css" rel="stylesheet" href="css/materialize.css"  media="screen,projection"/>
-
-  <script src="popup.js"></script>
+  	<link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+  	<link type="text/css" rel="stylesheet" href="css/marquee.css">
+  	<link type="text/css" rel="stylesheet" href="css/dark.css">
+  	<script src="js/Chart.min.js"></script>
+  	<script src="js/jquery-2.1.1.min.js"></script>
+  	<script src="js/jquery.marquee.min.js"></script>
+  	<script src="popup.js"></script>
+  	<script type="text/javascript" src="js/materialize.min.js"></script>
   </head>
   <body>
-  	<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
-    <script type="text/javascript" src="js/materialize.min.js"></script>
-    <div class="row">
+  <div align="right">
+    <label for="light_mode" style="cursor: pointer;"><font size="6" id='symbol'>&#9728;</font><input type="checkbox" id="light_mode" class="cbx hidden"/>
+    </label>
+  </div>
+  <div class="flow-text" align="center"><font size="6">RevMine<sup>&reg;</sup></font></div>
+  	<div class="row">
       <div class="col s12">
         <div class="progress" id='prog' style:"display: none;">
           <div class="indeterminate"></div>
         </div>
         <p id="status" class='flow-text'></p>
-    	  <table id='rev-table' class='striped'>
-    			<thead style="display:none">
-    				<tr>
-    					<th >Topic</th>
-    					<th >Rating</th>
-    					<th >Sentence</th>
-    				</tr>
-    			</thead>
-    			<tbody id='data' >
-    			      <tr>
-    	                </tr>
-    			</tbody>
-    		</table>
-  		</div>
+	  </div>
+  	  <canvas id="canvas" height="250" width="500" style="display: none;"></canvas>
+  	  <br>
+  	  <div class = "flow-text marquee" id='anim' align="center"></div>
     </div>
+    <footer align="center">Made with <font color="#FF00FF">&#10084;</font> in BITS Pilani by EvolvingLegends <sup>&copy;</sup> 2016</footer>
   </body>
 </html>
 

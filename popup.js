@@ -60,34 +60,38 @@ function getProductDetails(searchTerm, callback, errorCallback) {
   var parser = document.createElement('a');
   parser.href = searchTerm;
   var pat = /\/(B[A-Z0-9]{8,9})$/
+  var isbn_pat = /\/([0-9]{10})/
   var pid = 'BOGUS'
   if (pat.test(parser.pathname)){
     pid = pat.exec(parser.pathname)[1];
   }
+  else if(isbn_pat.test(parser.pathname)){
+    pid = isbn_pat.exec(parser.pathname)[1].toString();
+  }
   else {
     pat = /\/(B[A-Z0-9]{8,9})[\/\?]/
-    pid = pat.exec(parser.pathname) || 'BOGUS'
+    pid = pat.exec(parser.pathname)[1] || 'BOGUS'
   }
-  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pat.exec(parser.pathname)[1]
+  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pid
   console.log(searchUrl)
   var x = new XMLHttpRequest();
+  x.timeout = 400000;
   x.open('GET', searchUrl);
   // The Google image search API responds with JSON, so let Chrome parse it.
   x.responseType = 'json';
   x.onload = function() {
     // Parse and process the response from Google Image Search.
     var response = x.response;
-    console.log(response)
     if (!response) {
-      errorCallback('Product not in DataBase?');
+      errorCallback('Something went wrong. Contact @h4ck3rk3y?');
       return;
     }
-    callback(response.result,response.status);
+    callback(response.result,response.status,response.reviews);
   };
   x.onerror = function() {
     errorCallback('Network error.');
   };
-  setTimeout(function(){if (document.getElementById('status').textContent!=''){renderStatus('Product is new for us, processing..');document.getElementById('prog').style.display=''};}, 6000)
+  setTimeout(function(){if (document.getElementById('status').textContent=='Fetching insights for the product...'){renderStatus('Product is new for us, processing..');document.getElementById('prog').style.display=''};}, 6000)
   x.send();
 }
 
@@ -99,26 +103,48 @@ document.addEventListener('DOMContentLoaded', function() {
 
   getCurrentTabUrl(function(url) {
     // Put the image URL in Google search.
-    renderStatus('Fetching the Reviews For the Product...');
-    getProductDetails(url, function(result,status) {
+    renderStatus('Fetching insights for the product...');
+    getProductDetails(url, function(result,status, reviews) {
       document.getElementById('prog').style.display='none'
       if (status==200){
         renderStatus('');
-        var table = document.getElementById('rev-table');
-        table.tHead.style.display =''
-        var i = 1
+        var table = document.getElementById('canvas');
+        canvas.style.display='';
+        var ctx = document.getElementById("canvas").getContext("2d");
+        var barChartData ={}
+        barChartData.labels = []
+        barChartData.datasets= []
+        barChartData.datasets.push({fillColor : "rgba(51,178,63,0.5)",strokeColor : "rgba(51,178,63,0.8)",highlightFill: "rgba(51,178,63,0.75)"
+      ,highlightStroke: "rgba(51,178,63,1)"});
+        barChartData.datasets[0].data = []
+        var i = 1;
         for (var key in result) {
         	if (result.hasOwnProperty(key) && key!='_id' && key!='domain') {
-        		var row = table.insertRow(i);
-        		var cell0 = row.insertCell(0);
-        		var cell1 = row.insertCell(1);
-        		var cell2 = row.insertCell(2);
-        		cell0.innerHTML = key;
-        		cell1.innerHTML = result[key];
-        		cell2.innerHTML = 'Lorem ipsum. Lets win this thing.'
-        		var i = i + 1;
-        	}
+        	 barChartData.labels.push(key);
+           barChartData.datasets[0].data.push(result[key])
+          }
         }
+        window.myBar = new Chart(ctx).Bar(barChartData, {
+          responsive : true
+        });
+        console.log(reviews);
+        var $mq = $('#anim');
+
+        function showRandomMarquee() {
+          var rannum = Math.floor(Math.random()*reviews.length);
+          $mq
+            .marquee('destroy')
+            .bind('finished', function(){document.getElementById('anim').innerHTML = reviews[rannum];
+          setTimeout(function(){showRandomMarquee()},4000);})
+            .html(reviews[rannum])
+            .marquee({duration: 250, direction:'down'});
+        }
+
+
+        showRandomMarquee();
+      }
+      else if(status==100) {
+        renderStatus('Not enough reviews on the product...One day though?')
       }
       else {
         renderStatus('Something Went Wrong...')
@@ -134,4 +160,18 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-
+$(document).ready(function() {
+    //set initial state.
+    $('#light_mode').change(function() {
+        if($(this).is(":checked")) {
+            $("body").css("background",'rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box');
+            $("body").css("color","rgba(0, 0, 0, 0.870588)");
+            document.getElementById('symbol').innerHTML = '&#9789;'
+        }
+        else{
+            $("body").css("background","#1a1a1a")
+            $("body").css("color","#eaeaea")
+            document.getElementById('symbol').innerHTML = '&#9728;'
+        }
+    });
+});
