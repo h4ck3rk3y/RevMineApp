@@ -60,7 +60,7 @@ function getProductDetails(searchTerm, callback, errorCallback) {
   var parser = document.createElement('a');
   parser.href = searchTerm;
   var pat = /\/(B[A-Z0-9]{8,9})$/
-  var isbn_pat = /\/([0-9]{9})/
+  var isbn_pat = /\/([0-9]{10})/
   var pid = 'BOGUS'
   if (pat.test(parser.pathname)){
     pid = pat.exec(parser.pathname)[1];

@@ -62,7 +62,7 @@ def doit(pid):
     title = nltk.word_tokenize(i['title'].lower())
     for y in title:
         stop.append(y)
-    for j in range(1,10):
+    for j in range(1,min(len(i),20)):
         sents = nltk.sent_tokenize(i[str(j)].lower())
         for sent in sents:
             arr.append(strip_proppers_POS(sent))
@@ -103,9 +103,10 @@ def doit(pid):
 
             if float(score) > 0.0:
                 if noun not in noun_scores:
-                    noun_scores[noun] = dist*score
+                    noun_scores[noun] = [dist*score,0]
                 else:
-                    noun_scores[noun] += dist*score
+                    noun_scores[noun][0] += dist*score
+                    noun_scores[noun][1] += 1
             if float(neg_score) > 0.0:
                 if noun not in neg_noun_scores:
                     neg_noun_scores[noun] = dist*neg_score
@@ -124,10 +125,10 @@ def doit(pid):
                     revsSelected.append(selectedPartOfReview)
                 except:
                     revsSelected.append(adj+" "+noun)
-    noun_scores = sorted(noun_scores.items(),key=lambda x:x[1],reverse=True)
+    noun_scores = sorted(noun_scores.items(),key=lambda x:x[1][1],reverse=True)
     ns = {}
     for n_s in noun_scores:
-        ns[n_s[0]] = n_s[1]
+        ns[n_s[0]] = n_s[1][0]
 
     result = {}
     topics = {}
@@ -157,5 +158,3 @@ def doit(pid):
     # print result
     result_db.insert(result)
     return True
-
-

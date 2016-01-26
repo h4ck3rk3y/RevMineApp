@@ -33,7 +33,7 @@ def getRatings(domain,pid):
         except:
             return {'status':69, 'result':100, 'reviews':['Not Applicable']}
 
-    if foo:
+    if foo and foo.has_key('topics'):
         return {'result': foo['topics'], 'reviews':foo['sentences'], 'status':200}
     else:
         return {'status': 100, 'reviews':['Not Applicable'], 'result': 100}
