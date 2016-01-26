@@ -1,18 +1,20 @@
 from flask import request, url_for
 from flask.ext.api import FlaskAPI, status, exceptions
 from pymongo import MongoClient
+from integ import justDoIt()
 import time
 
 app = FlaskAPI(__name__)
-client = MongoClient('mongodb://172.17.30.113:27017/')
+client = MongoClient('mongodb://localhost:27017/')
 db = client.revmine
 
 def create_rev_natak(domain, pid):
-    """
-        add shubhus code here...
-    """
-    print "sleeping"
-    return [{'result': {'f': 1}, 'status':200, 'reviews':['shit phone', 'very shitty phone'],'valid':0}]
+    try:
+        justDoIt(pid)
+        foo = db.result.find({'_id' : pid, 'domain' :domain })
+        return foo
+    except:
+        return {'status':69, 'result':100, 'reviews':['Not Applicable']}
 
 @app.route("/<domain>/<pid>", methods=['GET'])
 def getRatings(domain,pid):

@@ -164,10 +164,12 @@ $(document).ready(function() {
         if($(this).is(":checked")) {
             $("body").css("background",'rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box');
             $("body").css("color","rgba(0, 0, 0, 0.870588)");
+            document.getElementById('symbol').innerHTML = '&#9789;'
         }
         else{
             $("body").css("background","#1a1a1a")
             $("body").css("color","#eaeaea")
+            document.getElementById('symbol').innerHTML = '&#9728;'
         }
     });
 });
