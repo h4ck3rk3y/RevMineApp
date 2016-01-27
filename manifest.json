@@ -11,7 +11,7 @@
   },
   "permissions": [
     "activeTab",
-    "http://localhost:5000/",
+    "http://www.revmine.tk/",
     "http://fonts.googleapis.com/",
     "tabs"
   ],

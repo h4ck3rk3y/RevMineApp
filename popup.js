@@ -72,7 +72,7 @@ function getProductDetails(searchTerm, callback, errorCallback) {
     pat = /\/(B[A-Z0-9]{8,9})[\/\?]/
     pid = pat.exec(parser.pathname)[1] || 'BOGUS'
   }
-  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pid
+  var searchUrl = 'http://www.revmine.tk/' + parser.hostname + '/' + pid
   console.log(searchUrl)
   var x = new XMLHttpRequest();
   x.timeout = 400000;
