@@ -29,6 +29,7 @@ stop.append('question')
 stop.append('one')
 stop.append('plus')
 stop.append('thanks')
+stop.append('things')
 
 def strip_proppers_POS(text):
     tokens = nltk.word_tokenize(text)
