@@ -48,6 +48,8 @@ def extract_text(li):
         for j, row in enumerate(soup('a', {'class': 'a-size-base a-link-normal review-title a-color-base a-text-bold'})):
             li[str((page-1)*10 + (j + 1))]['link'] = row['href']
 
+        li['domain'] ='amazon'
+
 
     return li
 
