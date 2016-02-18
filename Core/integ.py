@@ -1,4 +1,6 @@
 import amazon_rev
+import flipkart
+import snapdeal
 import nlp_dep
 from datetime import datetime
 import sys
@@ -8,14 +10,22 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client.revmine
 
 
-def justDoIt(pid):
+def justDoIt(domain,pid,product_name=None):
     try:
         print datetime.now()
-        amazon_rev.main(pid)
+        if 'amazon.in' in domain:
+            amazon_rev.main(pid, domain)
+        elif 'snapdeal.com' in domain:
+            snapdeal.main(pid, product_name, domain)
+        elif 'flipkart' in domain:
+            flipkart.main(pid, product_name, domain)
+
         print datetime.now(),
         print ':reviews gained/exist'
-        if db.result.find({'_id':pid,'valid':1}).count()==0:
-            nlp_dep.doit(pid)
+
+        if db.result.find({'_id' : pid, 'domain' :domain, 'valid':1 }).count()==0:
+            nlp_dep.doit(pid, domain)
+
         print datetime.now()
         print 'nltk done'
         return True
