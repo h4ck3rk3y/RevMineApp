@@ -11,6 +11,9 @@ client = MongoClient('mongodb://localhost:27017/')
 
 db = client.revmine
 
+def main(pid, product_name, domain):
+    if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
+        doit(pid, product_name)
 
 def extract_text(pid, product_name):
 	list_of_reviews = []
@@ -35,7 +38,7 @@ def extract_text(pid, product_name):
         for j, row in enumerate(soup('a',text='Permalink')):
             li[str((page-1)*10 + (j + 1))]['link'] = row['href']
 
-        li['domain'] = 'flipkart'
+        li['domain'] = 'www.flipkart.com'
     return li
 
 def doit(pid, product_name):

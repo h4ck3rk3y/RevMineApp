@@ -18,8 +18,6 @@ from datetime import datetime
 client = MongoClient('mongodb://localhost:27017/')
 db = client.revmine
 reviews = db.reviews
-done = db.done
-queue = db.queue
 result_db = db.result
 
 
@@ -57,13 +55,13 @@ def strip_proppers_POS(text):
                     res.append((adj,noun,(1/pow(minDist,2))))
     return res
 
-def doit(pid):
+def doit(pid, domain):
 
     arr = []
     revs = []
 
     print "In Doit"
-    i = reviews.find_one({"_id":pid})
+    i = reviews.find_one({"_id":pid, 'domain': domain})
     title = nltk.word_tokenize(i['title'].lower())
     for y in title:
         stop.append(y)
@@ -140,7 +138,7 @@ def doit(pid):
     result = {}
     topics = {}
     valid_sents = []
-    result['domain'] = "www.amazon.in"
+    result['domain'] = domain
     result['_id'] = pid
     result['valid'] = 0
     c=0
