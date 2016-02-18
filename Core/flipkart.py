@@ -35,7 +35,7 @@ def extract_text(pid, product_name):
         for j, row in enumerate(soup('a',text='Permalink')):
             li[str((page-1)*10 + (j + 1))]['link'] = row['href']
 
-        li['domain'] = 'snapdeal'
+        li['domain'] = 'flipkart'
     return li
 
 def doit(pid, product_name):
