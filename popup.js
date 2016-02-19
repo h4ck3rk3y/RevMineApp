@@ -102,7 +102,7 @@ function getProductDetails(searchTerm, callback, errorCallback) {
       errorCallback('Something went wrong. Contact @h4ck3rk3y?');
       return;
     }
-    callback(response.result,response.status,response.reviews);
+    callback(response.result,response.status,response.reviews,parser.hostname, pid, response.upvotes);
   };
   x.onerror = function() {
     errorCallback('Network error.');
@@ -116,11 +116,10 @@ function renderStatus(statusText) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-
   getCurrentTabUrl(function(url) {
     // Put the image URL in Google search.
     renderStatus('Fetching insights for the product...');
-    getProductDetails(url, function(result,status, reviews) {
+    getProductDetails(url, function(result, status, reviews, domain, pid, upvotes) {
       document.getElementById('prog').style.display='none'
       if (status==200){
         renderStatus('');
@@ -145,15 +144,33 @@ document.addEventListener('DOMContentLoaded', function() {
           responsive : true
         });
 
-		$("#canvas").click(
-		    function(evt){
-		        var activePoints = myBar.getBarsAtEvent(evt);
-		        console.log(activePoints[0]);
-		        /* do something */
-		    }
-		);
+		// $("#canvas").click(
+		//     function(evt){
+		//         var activePoints = myBar.getBarsAtEvent(evt);
+		//         console.log(activePoints[0]);
+		//         /* do something */
+		//     }
+		// );
+		var previous = null;
+		var callback = function(data) {
+			if(data.upvoted == true){
+				$.get('http://localhost:5000/vote/up/' + domain + '/' + pid, function(data,status){});
+				previous = 'upvoted';
+			}
+			else if (data.downvoted == true){
+				$.get('http://localhost:5000/vote/down/' + domain + '/' + pid, function(data,status){});
+				previous = 'downvoted';
+			}
+			else if(previous != 'upvoted'){
+				$.get('http://localhost:5000/vote/up/' + domain + '/' + pid, function(data,status){});
+			}
+			else{
+				$.get('http://localhost:5000/vote/down/' + domain + '/' + pid, function(data,status){})
+			}
+		};
 
-        console.log(reviews);
+		$('#topic').attr('hidden', false);
+        $('#topic').upvote({count: upvotes, callback: callback});
         var $mq = $('#anim');
 
         function showRandomMarquee() {
