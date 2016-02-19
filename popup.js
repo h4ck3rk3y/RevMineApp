@@ -88,7 +88,7 @@ function getProductDetails(searchTerm, callback, errorCallback) {
     pid = pat.exec(parser.pathname)[1] || 'BOGUS'
   }
 
-  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pid
+  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pid + '/' prod_name
   console.log(searchUrl)
   var x = new XMLHttpRequest();
   x.timeout = 400000;
