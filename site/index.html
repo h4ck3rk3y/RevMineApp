@@ -7,7 +7,7 @@
     <!--[if IE]><meta http-equiv="x-ua-compatible" content="IE=9" /><![endif]-->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>RevMine - make that buying decision</title>
-    <meta name="description" content="we review rate and summarize everything under the sun (and on amazon as of now)">
+    <meta name="description" content="We review, rate and summarize everything under the sun (and on amazon.in as of now)">
     <meta name="keywords" content="bootstrap theme, portfolio template, onepage, mobile responsive, themeforces wordpress themes, themeforces bootstrap theme">
     <meta name="author" content="">
 
@@ -54,7 +54,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="index.html">RevMine</a>
+          <a class="navbar-brand" href="/">RevMine</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -62,7 +62,8 @@
           <ul class="nav navbar-nav navbar-right">
             <li><a href="#tf-home" class="page-scroll">Home</a></li>
             <li><a href="#tf-about" class="page-scroll">About</a></li>
-            <li><a href="download.zip" class="page-scroll">Download Now!</a></li>
+            <li><a href="#tf-about" class="page-scroll">Getting Started</a></li>
+            <li><a href="RevMine.crx" class="page-scroll">Download Now!</a></li>
           </ul>
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
@@ -74,7 +75,10 @@
         <div class="overlay">
             <div class="content">
                 <h1>Welcome to <strong><span class="color">RevMine</span></strong></h1>
-
+		<div>
+			<button type="button" class="btn btn-outline-inverse btn-lg">
+			 <span class="text-primary"> <a href="RevMine.crx"><font color="blue">Download!</font></a></span></button>
+		</div>
                 <a href="#tf-about" class="fa fa-angle-down page-scroll"></a>
             </div>
         </div>
@@ -85,14 +89,13 @@
     <div id="tf-about">
         <div class="container">
             <div class="row">
-                <div class="col-md-8">
-                    <iframe width="560" height="315" src="https://www.youtube.com/embed/BvP4RIqSbiw" frameborder="0" allowfullscreen></iframe>
+                <div class="col-md-8" id="tf-video">
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/m0U0S0W5pmI" frameborder="0" allowfullscreen></iframe>
                 </div>
                 <div class="col-md-4">
                     <div class="about-text">
                         <div class="section-title">
                             <h4>About us</h4>
-                            <h2>Some words <strong>about us</strong></h2>
                             <hr>
                             <div class="clearfix"></div>
                         </div>
@@ -141,6 +144,15 @@
     <!-- Javascripts
     ================================================== -->
     <script type="text/javascript" src="js/main.js"></script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
+  ga('create', 'UA-60799114-3', 'auto');
+  ga('send', 'pageview');
+
+</script>
   </body>
 </html>

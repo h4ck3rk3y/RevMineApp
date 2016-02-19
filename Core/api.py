@@ -8,10 +8,10 @@ app = FlaskAPI(__name__)
 client = MongoClient('mongodb://localhost:27017/')
 db = client.revmine
 
-def create_rev_natak(domain, pid):
+def createve_rev(domain,pid,product_name=None):
     try:
     	print 'doesnt exist'
-        justDoIt(pid)
+        justDoIt(domain,pid,product_name)
         print 'gained'
         foo = db.result.find_one({'_id' : pid, 'domain' :domain, 'valid':1 })
         if foo:
@@ -21,15 +21,15 @@ def create_rev_natak(domain, pid):
     except:
         return {'status':69, 'result':100, 'reviews':['Not Applicable'], 'valid':0}
 
-@app.route("/<domain>/<pid>", methods=['GET'])
-def getRatings(domain,pid):
+@app.route("/<domain>/<pid>/<product_name>", methods=['GET'])
+def getRatings(domain,pid,product_name=None):
     """
     Retrieve, update or delete note instances.
     """
     foo = db.result.find_one({'_id' : pid, 'domain' :domain, 'valid':1 })
     if not foo:
         try:
-            foo = create_rev_natak(domain,pid)
+            foo = createve_rev(domain,pid,product_name)
         except:
             return {'status':69, 'result':100, 'reviews':['Not Applicable']}
 

@@ -61,9 +61,24 @@ function getProductDetails(searchTerm, callback, errorCallback) {
   parser.href = searchTerm;
   var pat = /\/(B[A-Z0-9]{8,9})$/
   var isbn_pat = /\/([0-9]{10})/
+  var snap_pat = /\/[0-9]{12}/
+  var flip_pat = /itme[a-z0-9]{12}/i
+  var flip_pat_name = /(\/[a-zA-Z\-0-9]+)\/p/
+  var snap_pat_name = /product(\/[a-zA-Z\-0-9]+)/
+
   var pid = 'BOGUS'
+  var prod_name = 'NAME'
+
   if (pat.test(parser.pathname)){
     pid = pat.exec(parser.pathname)[1];
+  }
+  else if(snap_pat.test(parser.pathname)){
+  	pid = snap_pat.exec(parser.pathname)[1].toString();
+  	prod_name = snap_pat_name.exec(parser.pathname)[1].toString();
+  }
+  else if(flip_pat.test(parser.pathname)){
+  	pid = flip_pat.exec(parser.pathname)[1].toString();
+  	prod_name = flip_pat_name.exec(parser.pathname)[1].toString();
   }
   else if(isbn_pat.test(parser.pathname)){
     pid = isbn_pat.exec(parser.pathname)[1].toString();
@@ -72,7 +87,8 @@ function getProductDetails(searchTerm, callback, errorCallback) {
     pat = /\/(B[A-Z0-9]{8,9})[\/\?]/
     pid = pat.exec(parser.pathname)[1] || 'BOGUS'
   }
-  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pid
+
+  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pid + '/' prod_name
   console.log(searchUrl)
   var x = new XMLHttpRequest();
   x.timeout = 400000;

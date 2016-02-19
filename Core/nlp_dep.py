@@ -244,4 +244,3 @@ def doit(pid, domain):
 	result_db.insert(result)
 	return True
 
-#doit('itmedhx3uy3qsfks','www.amazon.in')
