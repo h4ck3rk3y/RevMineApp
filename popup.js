@@ -61,10 +61,10 @@ function getProductDetails(searchTerm, callback, errorCallback) {
   parser.href = searchTerm;
   var pat = /\/(B[A-Z0-9]{8,9})$/
   var isbn_pat = /\/([0-9]{10})/
-  var snap_pat = /\/[0-9]{12}/
-  var flip_pat = /itme[a-z0-9]{12}/i
-  var flip_pat_name = /(\/[a-zA-Z\-0-9]+)\/p/
-  var snap_pat_name = /product(\/[a-zA-Z\-0-9]+)/
+  var snap_pat = /\/([0-9]{12})/
+  var flip_pat = /(itm[a-z0-9]{13})/i
+  var flip_pat_name = /\/([a-zA-Z\-0-9]+)\/p/
+  var snap_pat_name = /product\/([a-zA-Z\-0-9]+)/
 
   var pid = 'BOGUS'
   var prod_name = 'NAME'
@@ -88,7 +88,7 @@ function getProductDetails(searchTerm, callback, errorCallback) {
     pid = pat.exec(parser.pathname)[1] || 'BOGUS'
   }
 
-  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pid + '/' prod_name
+  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pid + '/' + prod_name
   console.log(searchUrl)
   var x = new XMLHttpRequest();
   x.timeout = 400000;
@@ -140,9 +140,19 @@ document.addEventListener('DOMContentLoaded', function() {
            barChartData.datasets[0].data.push(result[key])
           }
         }
+
         window.myBar = new Chart(ctx).Bar(barChartData, {
           responsive : true
         });
+
+		$("#canvas").click(
+		    function(evt){
+		        var activePoints = myBar.getBarsAtEvent(evt);
+		        console.log(activePoints[0]);
+		        /* do something */
+		    }
+		);
+
         console.log(reviews);
         var $mq = $('#anim');
 
