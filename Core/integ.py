@@ -18,6 +18,7 @@ def justDoIt(domain,pid,product_name=None):
         elif 'snapdeal.com' in domain:
             snapdeal.main(pid, product_name, domain)
         elif 'flipkart' in domain:
+            pid = pid.lower()
             flipkart.main(pid, product_name, domain)
 
         print datetime.now(),

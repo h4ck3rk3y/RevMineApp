@@ -67,9 +67,18 @@ function getProductDetails(searchTerm, callback, errorCallback) {
   var snap_pat_name = /product(\/[a-zA-Z\-0-9]+)/
 
   var pid = 'BOGUS'
+  var prod_name = 'NAME'
 
   if (pat.test(parser.pathname)){
     pid = pat.exec(parser.pathname)[1];
+  }
+  else if(snap_pat.test(parser.pathname)){
+  	pid = snap_pat.exec(parser.pathname)[1].toString();
+  	prod_name = snap_pat_name.exec(parser.pathname)[1].toString();
+  }
+  else if(flip_pat.test(parser.pathname)){
+  	pid = flip_pat.exec(parser.pathname)[1].toString();
+  	prod_name = flip_pat_name.exec(parser.pathname)[1].toString();
   }
   else if(isbn_pat.test(parser.pathname)){
     pid = isbn_pat.exec(parser.pathname)[1].toString();
@@ -79,7 +88,7 @@ function getProductDetails(searchTerm, callback, errorCallback) {
     pid = pat.exec(parser.pathname)[1] || 'BOGUS'
   }
 
-  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pid
+  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pid + '/' prod_name
   console.log(searchUrl)
   var x = new XMLHttpRequest();
   x.timeout = 400000;
