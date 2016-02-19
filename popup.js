@@ -144,13 +144,23 @@ document.addEventListener('DOMContentLoaded', function() {
           responsive : true
         });
 
-		// $("#canvas").click(
-		//     function(evt){
-		//         var activePoints = myBar.getBarsAtEvent(evt);
-		//         console.log(activePoints[0]);
-		//         /* do something */
-		//     }
-		// );
+    $("#anim").attr('hidden', false);
+		$("#canvas").click(
+		    function(evt){
+		        var activePoints = myBar.getBarsAtEvent(evt);
+            if (typeof activePoints[0] != 'undefined'){
+              if(domain == 'www.flipkart.com'){
+		            $("#anim").html('<a href="https://www.flipkart.com' + reviews[activePoints[0]['label']]['link'] + '" target="_blank">'  + reviews[activePoints[0]['label']]['snippet']  + '</a>');
+              }
+            else if(domain=='www.amazon.in'){
+              $("#anim").html('<a href="https://www.amazon.in' + reviews[activePoints[0]['label']]['link'] + '" target="_blank">'  + reviews[activePoints[0]['label']]['snippet']  + '</a>');
+            }
+            else{
+             $("#anim").html('<a href="' + reviews[activePoints[0]['label']]['link'] + '" target="_blank">'  + reviews[activePoints[0]['label']]['snippet']  + '</a>');
+            }
+        }
+      }
+		);
 		var previous = null;
 		var callback = function(data) {
 			if(data.upvoted == true){
@@ -170,21 +180,8 @@ document.addEventListener('DOMContentLoaded', function() {
 		};
 
 		$('#topic').attr('hidden', false);
-        $('#topic').upvote({count: upvotes, callback: callback});
-        var $mq = $('#anim');
+    $('#topic').upvote({count: upvotes, callback: callback});
 
-        function showRandomMarquee() {
-          var rannum = Math.floor(Math.random()*reviews.length);
-          $mq
-            .marquee('destroy')
-            .bind('finished', function(){document.getElementById('anim').innerHTML = reviews[rannum];
-          setTimeout(function(){showRandomMarquee()},4000);})
-            .html(reviews[rannum])
-            .marquee({duration: 250, direction:'down'});
-        }
-
-
-        showRandomMarquee();
       }
       else if(status==100) {
         renderStatus('Not enough reviews on the product...One day though?')
