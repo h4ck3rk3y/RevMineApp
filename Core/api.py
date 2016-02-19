@@ -8,7 +8,7 @@ app = FlaskAPI(__name__)
 client = MongoClient('mongodb://localhost:27017/')
 db = client.revmine
 
-def create_rev(domain, pid, product_name, upvotes):
+def create_rev(domain, pid, product_name):
     try:
     	print 'doesnt exist'
         justDoIt(domain,pid,product_name)
@@ -17,7 +17,7 @@ def create_rev(domain, pid, product_name, upvotes):
         if foo:
             return foo
         else:
-            return {'status':69, 'result':110, 'reviews':['Not Applicable'], 'valid':0, 'upvotes': upvotes}
+            return {'status':69, 'result':110, 'reviews':['Not Applicable'], 'valid':0}
     except:
         return {'status':69, 'result':100, 'reviews':['Not Applicable'], 'valid':0}
 
@@ -37,7 +37,7 @@ def getRatings(domain,pid,product_name=None):
 
     if not foo:
         try:
-            foo = create_rev(domain , pid, product_name, upvotes)
+            foo = create_rev(domain , pid, product_name)
         except:
             return {'status':69, 'result':100, 'reviews':['Not Applicable']}
 

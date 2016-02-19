@@ -15,7 +15,7 @@ from nltk.corpus import sentiwordnet as swn
 import string
 from datetime import datetime
 
-client = MongoClient('192.168.1.106')
+client = MongoClient('mongodb://localhost:27017')
 #client = MongoClient('172.17.30.135')
 db = client.revmine
 reviews = db.reviews
@@ -149,13 +149,11 @@ def doit(pid, domain):
 	noun_scores = {}
 	neg_noun_scores = {}
 	revsSelected = []
-		
 	for yolo in range(0,len(arr),1):
 		for i in arr[yolo]:
 			adj = i[0]
 			noun = i[1]
 			dist = i[2]
-			
 			if noun in dict(jacard_scores[50:len(jacard_scores)]):
 				score = 0
 				neg_score = 0
@@ -227,7 +225,7 @@ def doit(pid, domain):
 				c+=1
 			else:
 				break
-	
+
 	result['valid'] = 1
 	result['topics'] = topics
 
@@ -238,9 +236,7 @@ def doit(pid, domain):
 			final_sentences.append(i)
 			topics_selected.append(i['topic'])
 
-	result['sentences'] = final_sentences
-
-	#pprint(result)
+	result['sentences'] = {x['topic']:{'link': x['link'],'snippet': x['snippet']} for x in final_sentences}
 	result_db.insert(result)
 	return True
 
