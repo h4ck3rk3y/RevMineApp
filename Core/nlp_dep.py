@@ -14,13 +14,14 @@ from nltk.corpus import wordnet as wn
 from nltk.corpus import sentiwordnet as swn
 import string
 from datetime import datetime
+from sklearn.feature_extraction.text import TfidfVectorizer
+import inflect
 
-client = MongoClient('192.168.1.106')
-#client = MongoClient('172.17.30.135')
+client = MongoClient('10.42.0.51')
 db = client.revmine
 reviews = db.reviews
 result_db = db.result
-
+p = inflect.engine()
 
 stop = stopwords.words('english')
 stop.append('amazon')
@@ -28,12 +29,19 @@ stop.append('flipkart')
 stop.append('snapdeal')
 stop.append('book')
 stop.append('phone')
+stop.append('review')
+stop.append('life')
+stop.append('user')
+stop.append('usage')
+stop.append('product')
+stop.append('quality')
+
 
 def strip_proppers_POS(text):
 	tokens = nltk.word_tokenize(text)
 	tagged = nltk.tag._pos_tag(tokens,tagset, tagger)
 	res = []
-	words = [(word,pos) for word,pos in tagged if (pos[0]=="N" or pos[0]=="J") and len(word)>3 and word not in stop and eng_check.check(word) and not any(ccc.isdigit() for ccc in word)]
+	words = [(word,pos) for word,pos in tagged if (pos[0]=="N" or pos[0]=="J") and len(word)>3 and word not in stop and not p.singular_noun(word) and eng_check.check(word) and not any(ccc.isdigit() for ccc in word)]
 	word_serial = {}
 	for w in range(0,len(words),1):
 		word_serial[words[w][0]] = w
@@ -55,48 +63,11 @@ def strip_proppers_POS(text):
 					res.append((adj,noun,(1/pow(minDist,2))))
 	return res
 
-def findLefts(text):
-	tokens = nltk.word_tokenize(text)
-	tagged = nltk.tag._pos_tag(tokens,tagset, tagger)
-	res = []
-	words = [(word,pos) for word,pos in tagged if (pos[0]=="N") and len(word)>3 and word not in stop and eng_check.check(word) and not any(ccc.isdigit() for ccc in word)]
-	leftsToBeReturned = {}
-	for i in range(1,len(words)):
-		leftsToBeReturned[words[i][0]] = []
-		for j in range(0,i):
-			leftsToBeReturned[words[i][0]].append(words[j][0])
-	return leftsToBeReturned
-
-def findRights(text):
-	tokens = nltk.word_tokenize(text)
-	tagged = nltk.tag._pos_tag(tokens,tagset, tagger)
-	res = []
-	words = [(word,pos) for word,pos in tagged if (pos[0]=="N") and len(word)>3 and word not in stop and eng_check.check(word) and not any(ccc.isdigit() for ccc in word)]
-	
-	rightsToBeReturned = {}
-	for i in range(0,len(words)-1):
-		rightsToBeReturned[words[i][0]] = []
-		for j in range(i+1,len(words)):
-			rightsToBeReturned[words[i][0]].append(words[j][0]) 
-	return rightsToBeReturned
-
-def jacard(lefts,rights, word1, word2):
-	if word1 not in lefts or word2 not in lefts:
-		left_jacard = 0
-	else:
-		left_jacard = len(set(lefts[word1]).intersection(lefts[word1]))/len(set(lefts[word1]).union(lefts[word2])) 
-	if word1 not in rights or word2 not in rights:
-		right_jacard = 0
-	else:
-		right_jacard = len(set(rights[word1]).intersection(rights[word1]))/len(set(rights[word1]).union(rights[word2]))
-
-	return (left_jacard+right_jacard)/2
-
-
 def doit(pid, domain):
 
 	arr = []
 	revs = []
+	documents = []
 	lefts = {}
 	rights = {}
 
@@ -110,53 +81,29 @@ def doit(pid, domain):
 		link = i[str(j)]['link']
 		for sent in sents:
 			arr.append(strip_proppers_POS(sent))
-			l = findLefts(sent)
-			#l = {w1 :[w2,w3], w4:[w5]} 
-			r = findRights(sent)
-			for left in l:
-				if left not in lefts:
-					lefts[left] = list(set(l[left]))
-				else:
-					for left_val in l[left]:
-						if left_val not in lefts[left]:
-							lefts[left].append(left_val )
-			
-			for right in r:
-				if right not in rights:
-					rights[right] = list(set(r[right]))
-				else:
-					for right_val in r[right]:
-						if right_val not in rights[right]:
-							rights[right].append(right_val )
-		
-
 			revs.append((sent,link))
-	jacard_scores = {}
-	for i in lefts:
-		for j in lefts:
-			if j != i: 				
-				score = jacard(lefts,rights,i,j)
-				if i not in jacard_scores:
-					jacard_scores[i] = score
-				else:
-					jacard_scores[i] += score
-				if j not in jacard_scores:
-					jacard_scores[j] = score
-				else:
-					jacard_scores[j] += score
-
-	jacard_scores = (sorted(jacard_scores.iteritems(), key=operator.itemgetter(1), reverse=True))
+			documents.append(sent)
 	noun_scores = {}
 	neg_noun_scores = {}
 	revsSelected = []
-		
+	tfidf_vectorizer = TfidfVectorizer(max_df=0.75, max_features=100,min_df=0.01,use_idf=True,stop_words="english", ngram_range=(1,2))
+	try:
+		tfidf_matrix = tfidf_vectorizer.fit_transform(documents)
+		terms = tfidf_vectorizer.get_feature_names()
+	except:
+		err = 1
+	bigrams = []
+	for t in terms:
+		if len(nltk.word_tokenize(t))==2:
+			bigrams.append(i for i in t)
+	
 	for yolo in range(0,len(arr),1):
 		for i in arr[yolo]:
 			adj = i[0]
 			noun = i[1]
 			dist = i[2]
-			
-			if noun in dict(jacard_scores[50:len(jacard_scores)]):
+		
+			if noun in terms or noun in bigrams:
 				score = 0
 				neg_score = 0
 				adj_synset = swn.senti_synsets(adj,'a')
@@ -238,9 +185,9 @@ def doit(pid, domain):
 			final_sentences.append(i)
 			topics_selected.append(i['topic'])
 
-	result['sentences'] = final_sentences
+	result['sentences'] = {x['topic']:{'link': x['link'],'snippet': x['snippet']} for x in final_sentences}
 
 	#pprint(result)
 	result_db.insert(result)
 	return True
-
+#doit('B012II9E6C','www.amazon.in')
