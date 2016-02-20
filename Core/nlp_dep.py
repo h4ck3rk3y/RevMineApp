@@ -17,7 +17,9 @@ from datetime import datetime
 from sklearn.feature_extraction.text import TfidfVectorizer
 import inflect
 
-client = MongoClient('10.42.0.51')
+#client = MongoClient('10.42.0.51')
+client = MongoClient('mongodb://localhost:27017')
+#client = MongoClient('172.17.30.135')
 db = client.revmine
 reviews = db.reviews
 result_db = db.result
@@ -102,7 +104,6 @@ def doit(pid, domain):
 			adj = i[0]
 			noun = i[1]
 			dist = i[2]
-		
 			if noun in terms or noun in bigrams:
 				score = 0
 				neg_score = 0
@@ -174,7 +175,7 @@ def doit(pid, domain):
 				c+=1
 			else:
 				break
-	
+
 	result['valid'] = 1
 	result['topics'] = topics
 
@@ -186,7 +187,6 @@ def doit(pid, domain):
 			topics_selected.append(i['topic'])
 
 	result['sentences'] = {x['topic']:{'link': x['link'],'snippet': x['snippet']} for x in final_sentences}
-
 	#pprint(result)
 	result_db.insert(result)
 	return True

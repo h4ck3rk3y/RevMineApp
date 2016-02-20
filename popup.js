@@ -61,10 +61,10 @@ function getProductDetails(searchTerm, callback, errorCallback) {
   parser.href = searchTerm;
   var pat = /\/(B[A-Z0-9]{8,9})$/
   var isbn_pat = /\/([0-9]{10})/
-  var snap_pat = /\/[0-9]{12}/
-  var flip_pat = /itme[a-z0-9]{12}/i
-  var flip_pat_name = /(\/[a-zA-Z\-0-9]+)\/p/
-  var snap_pat_name = /product(\/[a-zA-Z\-0-9]+)/
+  var snap_pat = /\/([0-9]{12})/
+  var flip_pat = /(itm[a-z0-9]{13})/i
+  var flip_pat_name = /\/([a-zA-Z\-0-9]+)\/p/
+  var snap_pat_name = /product\/([a-zA-Z\-0-9]+)/
 
   var pid = 'BOGUS'
   var prod_name = 'NAME'
@@ -88,7 +88,7 @@ function getProductDetails(searchTerm, callback, errorCallback) {
     pid = pat.exec(parser.pathname)[1] || 'BOGUS'
   }
 
-  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pid + '/' prod_name
+  var searchUrl = 'http://localhost:5000/' + parser.hostname + '/' + pid + '/' + prod_name
   console.log(searchUrl)
   var x = new XMLHttpRequest();
   x.timeout = 400000;
@@ -102,7 +102,7 @@ function getProductDetails(searchTerm, callback, errorCallback) {
       errorCallback('Something went wrong. Contact @h4ck3rk3y?');
       return;
     }
-    callback(response.result,response.status,response.reviews);
+    callback(response.result,response.status,response.reviews,parser.hostname, pid, response.upvotes);
   };
   x.onerror = function() {
     errorCallback('Network error.');
@@ -116,11 +116,10 @@ function renderStatus(statusText) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-
   getCurrentTabUrl(function(url) {
     // Put the image URL in Google search.
     renderStatus('Fetching insights for the product...');
-    getProductDetails(url, function(result,status, reviews) {
+    getProductDetails(url, function(result, status, reviews, domain, pid, upvotes) {
       document.getElementById('prog').style.display='none'
       if (status==200){
         renderStatus('');
@@ -140,24 +139,49 @@ document.addEventListener('DOMContentLoaded', function() {
            barChartData.datasets[0].data.push(result[key])
           }
         }
+
         window.myBar = new Chart(ctx).Bar(barChartData, {
           responsive : true
         });
-        console.log(reviews);
-        var $mq = $('#anim');
 
-        function showRandomMarquee() {
-          var rannum = Math.floor(Math.random()*reviews.length);
-          $mq
-            .marquee('destroy')
-            .bind('finished', function(){document.getElementById('anim').innerHTML = reviews[rannum];
-          setTimeout(function(){showRandomMarquee()},4000);})
-            .html(reviews[rannum])
-            .marquee({duration: 250, direction:'down'});
+    $("#anim").attr('hidden', false);
+		$("#canvas").click(
+		    function(evt){
+		        var activePoints = myBar.getBarsAtEvent(evt);
+            if (typeof activePoints[0] != 'undefined'){
+              if(domain == 'www.flipkart.com'){
+		            $("#anim").html('<a href="https://www.flipkart.com' + reviews[activePoints[0]['label']]['link'] + '" target="_blank">'  + reviews[activePoints[0]['label']]['snippet']  + '</a>');
+              }
+            else if(domain=='www.amazon.in'){
+              $("#anim").html('<a href="https://www.amazon.in' + reviews[activePoints[0]['label']]['link'] + '" target="_blank">'  + reviews[activePoints[0]['label']]['snippet']  + '</a>');
+            }
+            else{
+             $("#anim").html('<a href="' + reviews[activePoints[0]['label']]['link'] + '" target="_blank">'  + reviews[activePoints[0]['label']]['snippet']  + '</a>');
+            }
         }
+      }
+		);
+		var previous = null;
+		var callback = function(data) {
+			if(data.upvoted == true){
+				$.get('http://localhost:5000/vote/up/' + domain + '/' + pid, function(data,status){});
+				previous = 'upvoted';
+			}
+			else if (data.downvoted == true){
+				$.get('http://localhost:5000/vote/down/' + domain + '/' + pid, function(data,status){});
+				previous = 'downvoted';
+			}
+			else if(previous != 'upvoted'){
+				$.get('http://localhost:5000/vote/up/' + domain + '/' + pid, function(data,status){});
+			}
+			else{
+				$.get('http://localhost:5000/vote/down/' + domain + '/' + pid, function(data,status){})
+			}
+		};
 
+		$('#topic').attr('hidden', false);
+    $('#topic').upvote({count: upvotes, callback: callback});
 
-        showRandomMarquee();
       }
       else if(status==100) {
         renderStatus('Not enough reviews on the product...One day though?')

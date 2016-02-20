@@ -2,7 +2,7 @@
   "manifest_version": 2,
 
   "name": "RevMine",
-  "description": "HackNow",
+  "description": "Make that buying decision!",
   "version": "2.0",
 
   "page_action": {
@@ -18,6 +18,8 @@
   "background": {
   	"scripts": ["bg.js"]
   },
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
-
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "icons": {
+    "128": "icon.png"
+  }
 }
