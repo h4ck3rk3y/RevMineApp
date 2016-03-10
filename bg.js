@@ -5,7 +5,7 @@ function checkForValidUrl(tabId, changeInfo, tab) {
   var isbn_pat = /\/[0-9]{10}/
   var snap_pat = /\/[0-9]{12}/
   var flip_pat = /itm[a-z0-9]{13}/i
-  if (  (pat.test(tab.url) || isbn_pat.test(tab.url) || snap_pat.test(tab.url) || flip_pat.test(tab.url)) == true && (tab.url.indexOf('www.amazon.in') || tab.url.indexOf('www.snapdeal.com') || tab.url.indexOf('www.flipkart.com')) ){
+  if (  (pat.test(tab.url) || isbn_pat.test(tab.url) || snap_pat.test(tab.url) || flip_pat.test(tab.url)) == true && (tab.url.indexOf('www.amazon.in') !=-1 || tab.url.indexOf('www.snapdeal.com') !=-1 || tab.url.indexOf('www.flipkart.com') !=-1) ){
     chrome.pageAction.show(tabId);
   }
 };
