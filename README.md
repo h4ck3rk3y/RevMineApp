@@ -14,7 +14,5 @@ Make that buying decision.
 - js/ images/ css/ contain assets for the extension
 - popup.html, popup.js and bg.js are the main parts of the extension
 
-#Site
-- The code for the website, find it [here](http://revmine.tk).
 
 
