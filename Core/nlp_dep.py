@@ -20,7 +20,7 @@ import inflect
 #client = MongoClient('10.42.0.16')
 client = MongoClient('mongodb://localhost:27017')
 #client = MongoClient('172.17.30.135')
-db = client.revmine
+db = client.revmine_2
 reviews = db.reviews
 result_db = db.result
 p = inflect.engine()
@@ -74,11 +74,11 @@ def doit(pid, domain):
 	rights = {}
 
 	print "In Doit"
-	i = reviews.find_one({"_id":pid})
+	i = reviews.find_one({"_id":pid, 'domain': domain})
 	title = nltk.word_tokenize(i['title'].lower())
 	for y in title:
 		stop.append(y)
-	for j in range(1,min(len(i)-2,50)):
+	for j in range(1,min(int(i['count']),50)):
 		sents = nltk.sent_tokenize(i[str(j)]['text'].lower())
 		link = i[str(j)]['link']
 		for sent in sents:

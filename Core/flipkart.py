@@ -10,7 +10,7 @@ flipkart_link = "http://www.flipkart.com/%s/product-reviews/%s?type=top&start=%d
 
 client = MongoClient('mongodb://localhost:27017/')
 
-db = client.revmine
+db = client.revmine_2
 
 def main(pid, product_name, domain):
 	if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
@@ -18,7 +18,8 @@ def main(pid, product_name, domain):
 
 def extract_text(pid, product_name):
 	li = {}
-	for page in range(0,5):
+	count = 0
+	for page in range(0,1):
 		url_ = flipkart_link % (product_name, pid, page*10)
 		print url_
 		try:
@@ -34,12 +35,13 @@ def extract_text(pid, product_name):
 
 		for j, row in enumerate(soup('span', {'class': 'review-text'})):
 			li[str((page)*10 + (j + 1))] = {}
+			count = count + 1
 			li[str((page)*10 + (j + 1))]['text'] = row.text
 
 		for j, row in enumerate(soup('a',text='Permalink')):
 			li[str((page)*10 + (j + 1))]['link'] = row['href']
 
-
+	li['count'] = count
 	#Extracting Alternatives!
 	url = "http://www.flipkart.com/" + product_name + "/p/" + pid
 	soup = make_soup(url)
@@ -58,7 +60,7 @@ def extract_text(pid, product_name):
 	for p in price_ranges:
 		title = p['title']
 		prices = [int(s) for s in title.split() if s.isdigit()]
-		if len(prices) == 2 and my_price < prices[1] and my_price > prices[0]:
+		if len(prices) == 2 and my_price <= prices[1] and my_price > prices[0]:
 			url_split = all_products_url.split('?')
 			new_all_products_url = 'http://www.flipkart.com' + url_split[0] + "?p%5B%5D=facets.price_range%255B%255D%3DRs.%2B" + str(prices[0]) + "%2B-%2BRs.%2B" + str(prices[1]) + "&" + url_split[1]
 			low_price = prices[0]
@@ -70,10 +72,8 @@ def extract_text(pid, product_name):
 			low_price = prices[0]
 			high_price = 200000
 			break
-
 	soup = make_soup(new_all_products_url)
-	other_products = soup.findAll('div',{'class':'product-unit unit-4 browse-product new-design '})
-
+	other_products = soup.findAll('div',{'class':'product-unit'})
 	all_products = []
 	for i in other_products:
 		try:
@@ -87,33 +87,39 @@ def extract_text(pid, product_name):
 			this_product['value'] = float(this_product['price'])/float(this_product['rating'])
 			all_products.append(this_product)
 		except:
+			import traceback; traceback.print_exc();
 			pass
 
-	my_dict = {'name':'Itself', 'price':my_price, 'rating':my_stars, 'link':url, 'value':my_score, 'image':'Dummy Image Url'}
 
-	exist_flag = 0
-	for i in all_products:
-		if i['link'] == url:
-			exist_flag = 1
-			break
-	if exist_flag == 0:
-		all_products.append(my_dict)
 
 	sorted_products = sorted(all_products, key = lambda x:x['value'])
-	position = sorted_products.index(my_dict)
 
+	ranked = 0
+	found = 0
+	for x in sorted_products:
+		ranked = ranked + 1
+		if  li['title'].strip()[:li['title'].strip().find(':')] in x['name'].strip():
+			found = 1
+			break
+
+	if found ==0:
+		ranked = -1
+
+	position = ranked
+
+	li['title'] = li['title'].strip()[:li['title'].strip().find(':')]
 	li['domain'] = 'www.flipkart.com'
 	li['_id'] = pid
 	li['category'] = category
 	li['rank'] = position
 	li['low-price'] = low_price
 	li['high-price'] = high_price
-	li['related_products'] = sorted_products
+	li['related_products'] = sorted_products[:10]
+
 	return li
 
 def doit(pid, product_name):
 
 	list_of_reviews = extract_text(pid, product_name)
 	inserted_review = db.reviews.insert_one(list_of_reviews).inserted_id
-	print 'yahan bhi aagaya'
 	assert(inserted_review == pid)

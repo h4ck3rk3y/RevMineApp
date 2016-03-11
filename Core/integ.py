@@ -7,7 +7,7 @@ import sys
 from pymongo import MongoClient
 client = MongoClient('mongodb://localhost:27017/')
 
-db = client.revmine
+db = client.revmine_2
 
 
 def justDoIt(domain,pid,product_name=None):
@@ -31,5 +31,6 @@ def justDoIt(domain,pid,product_name=None):
         print 'nltk done'
         return True
     except:
+        import traceback; traceback.print_exc();
         print "Unexpected error:", sys.exc_info()[0]
         return False

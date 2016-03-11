@@ -2,7 +2,6 @@ from bs4 import BeautifulSoup
 import requests
 
 def get_price_range(price):
-
 	if price >= 0 and price < 1000:
 		return (price-100,price+100)
 	if price >= 1000 and price < 5000:

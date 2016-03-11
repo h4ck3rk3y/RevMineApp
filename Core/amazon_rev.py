@@ -10,7 +10,7 @@ amazon_link = "http://www.amazon.in/product-reviews/%s?sortBy=helpful&pageNumber
 
 client = MongoClient('mongodb://localhost:27017/')
 
-db = client.revmine
+db = client.revmine_2
 reviews = db.reviews
 done = db.done
 recom = db.recom
@@ -50,39 +50,35 @@ def main(pid, domain):
 		doit(pid)
 
 def extract_text(li):
-	for page in range(1,6):
+	count = 0
+	for page in range(1,2):
 		# Page 1 soup!
 		url_ = amazon_link % (li["_id"], page)
-		mila = False
 		print "Trying " + url_ + " now!"
-		while(1):
-			try:
-				print 'downloading'
-				response = requests.get(url_)
-				print 'downloaded'
-				if response.status_code==200:
-					mila = True
-					print 'yes'
-					soup = BeautifulSoup(response.text)
-					break
-			except:
+		try:
+			response = requests.get(url_)
+			if response.status_code==200:
+				soup = BeautifulSoup(response.text)
+			else:
 				continue
-		if not mila:
+		except:
+			print 'continued'
 			continue
+
 		li['title'] = soup('span', {'class': 'a-text-ellipsis'})[0].a.text
 
 		# will scrape reviews' text
 		for j, row in enumerate(soup('span', {'class': 'review-text'})):
 			li[str((page-1)*10 + (j + 1))] = {}
 			li[str((page-1)*10 + (j + 1))]['text'] = row.text
+			count +=1
 
 		for j, row in enumerate(soup('a', {'class': 'a-size-base a-link-normal review-title a-color-base a-text-bold'})):
 			li[str((page-1)*10 + (j + 1))]['link'] = row['href']
-
+	li['count'] = count
 	#Extracting Alternatives!
-	url = "http://www.amazon.in/dp/" + pid
+	url = "http://www.amazon.in/dp/" + li['_id']
 	soup = 	make_soup(url)
-
 	spans = soup.findAll('span',{'class': 'a-list-item'})
 	for span in spans:
 		links = span.find_all('a',{'class':'a-link-normal a-color-tertiary'})
@@ -104,23 +100,24 @@ def extract_text(li):
 	details = get_details(all_products_url)
 	own_score = float(price)/float(stars)
 
-	my_dict = {'name':'Itself', 'price':price, 'rating':stars, 'link':url, 'value':own_score, 'image':'Dummy Image Url'}
+	ranked = 0
 
-	exist_flag = 0
-	for i in details:
-		if i['link'] == url:
-			exist_flag = 1
-			break
-	if exist_flag == 0:
-		#Gotta fix my own name and image!
-		details.append(my_dict)
 
 	sorted_products = sorted(details, key = lambda x:x['value'])
-	position = sorted_products.index(my_dict)
-	li['rank'] = position
+	found = 0
+	for x in sorted_products:
+		ranked = ranked + 1
+		if x['name'].strip() == li['title'].strip():
+			found = 1
+			break
+
+	if found ==0:
+			ranked = -1
+
+	li['rank'] = ranked
 	li['low-price'] = price_range[0]
 	li['high-price'] = price_range[1]
-	li['related_products'] = sorted_products
+	li['related_products'] = sorted_products[:10]
 	li['category'] = category
 	li['domain'] ='www.amazon.in'
 	return li
