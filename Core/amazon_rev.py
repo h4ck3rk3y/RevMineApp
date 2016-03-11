@@ -46,42 +46,41 @@ def get_details(all_products_url):
 	return related_products
 	
 def main(pid, domain):
-    if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
-        doit(pid)
+	if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
+		doit(pid)
 
 def extract_text(li):
-    for page in range(1,6):
-        # Page 1 soup!
-        url_ = amazon_link % (li["_id"], page)
-        mila = False
-        print "Trying " + url_ + " now!"
-        while(1):
-            try:
-                print 'downloading'
-                response = requests.get(url_)
-                print 'downloaded'
-                if response.status_code==200:
-                    mila = True
-                    print 'yes'
-                    soup = BeautifulSoup(response.text)
-                    break
-            except:
-                continue
-        if not mila:
-            continue
-        li['title'] = soup('span', {'class': 'a-text-ellipsis'})[0].a.text
+	for page in range(1,6):
+		# Page 1 soup!
+		url_ = amazon_link % (li["_id"], page)
+		mila = False
+		print "Trying " + url_ + " now!"
+		while(1):
+			try:
+				print 'downloading'
+				response = requests.get(url_)
+				print 'downloaded'
+				if response.status_code==200:
+					mila = True
+					print 'yes'
+					soup = BeautifulSoup(response.text)
+					break
+			except:
+				continue
+		if not mila:
+			continue
+		li['title'] = soup('span', {'class': 'a-text-ellipsis'})[0].a.text
 
-        # will scrape reviews' text
-        for j, row in enumerate(soup('span', {'class': 'review-text'})):
-            li[str((page-1)*10 + (j + 1))] = {}
-            li[str((page-1)*10 + (j + 1))]['text'] = row.text
+		# will scrape reviews' text
+		for j, row in enumerate(soup('span', {'class': 'review-text'})):
+			li[str((page-1)*10 + (j + 1))] = {}
+			li[str((page-1)*10 + (j + 1))]['text'] = row.text
 
-        for j, row in enumerate(soup('a', {'class': 'a-size-base a-link-normal review-title a-color-base a-text-bold'})):
-            li[str((page-1)*10 + (j + 1))]['link'] = row['href']
+		for j, row in enumerate(soup('a', {'class': 'a-size-base a-link-normal review-title a-color-base a-text-bold'})):
+			li[str((page-1)*10 + (j + 1))]['link'] = row['href']
 	
-		url = "http://www.amazon.in/dp/" + pid 
-
-	#Extracting Alternatives!	
+	#Extracting Alternatives!		
+	url = "http://www.amazon.in/dp/" + pid 
 	soup = 	make_soup(url)
 	
 	spans = soup.findAll('span',{'class': 'a-list-item'})
@@ -105,16 +104,15 @@ def extract_text(li):
 	own_score = float(price)/float(stars)	
 
 	my_dict = {'name':'Itself', 'price':price, 'stars':stars, 'link':url, 'value':own_score, 'image':'Dummy Image Url'}	
-    
-    exist_flag = 0	
-    for i in other_products:	
+	
+	exist_flag = 0	
+	for i in other_products:	
 		if i['link'] == url:
 			exist_flag = 1
-            break
-    if exist_flag == 0:
+			break
+	if exist_flag == 0:
 		#Gotta fix my own name and image!
-    	all_products.append(my_dict)	
-    details.append(my_dict)
+		details.append(my_dict)
 
 	sorted_products = sorted(details, key = lambda x:x['value'])
 	position = sorted_products.index(my_dict)
@@ -122,16 +120,16 @@ def extract_text(li):
 	li['low-price'] = price_range[0]
 	li['high-price'] = price_range[1]
 	li['related_products'] = sorted_products
-    li['domain'] ='www.amazon.in'
-    return li
+	li['domain'] ='www.amazon.in'
+	return li
 
 def doit(pid):
 
-    # picking an object from the queue
-    product_asin = pid
-    li = {}
-    li["_id"] = product_asin
-    li = extract_text(li)
+	# picking an object from the queue
+	product_asin = pid
+	li = {}
+	li["_id"] = product_asin
+	li = extract_text(li)
 
-    inserted_review = reviews.insert_one(li).inserted_id
-    assert(inserted_review == product_asin)
+	inserted_review = reviews.insert_one(li).inserted_id
+	assert(inserted_review == product_asin)

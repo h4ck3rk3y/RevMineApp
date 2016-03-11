@@ -13,35 +13,34 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client.revmine
 
 def main(pid, product_name, domain):
-    if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
-        doit(pid, product_name)
+	if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
+		doit(pid, product_name)
 
 def extract_text(pid, product_name):
-    li = {}
-    for page in range(0,5):
-        url_ = flipkart_link % (product_name, pid, page*10)
-        print url_
-        try:
-            response = requests.get(url_)
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.text)
-            else:
-                continue
-        except:
-            print 'something awful just happened'
+	li = {}
+	for page in range(0,5):
+		url_ = flipkart_link % (product_name, pid, page*10)
+		print url_
+		try:
+			response = requests.get(url_)
+			if response.status_code == 200:
+				soup = BeautifulSoup(response.text)
+			else:
+				continue
+		except:
+			print 'something awful just happened'
 
-        li['title'] = soup('img', {'onload':'img_onload(this);'})[0]["alt"]
+		li['title'] = soup('img', {'onload':'img_onload(this);'})[0]["alt"]
 
-        for j, row in enumerate(soup('span', {'class': 'review-text'})):
-            li[str((page)*10 + (j + 1))] = {}
-            li[str((page)*10 + (j + 1))]['text'] = row.text
+		for j, row in enumerate(soup('span', {'class': 'review-text'})):
+			li[str((page)*10 + (j + 1))] = {}
+			li[str((page)*10 + (j + 1))]['text'] = row.text
 
-        for j, row in enumerate(soup('a',text='Permalink')):
-            li[str((page)*10 + (j + 1))]['link'] = row['href']
+		for j, row in enumerate(soup('a',text='Permalink')):
+			li[str((page)*10 + (j + 1))]['link'] = row['href']
 	
 
 	#Extracting Alternatives!
-
 	url = "http://www.flipkart.com/" + product_name + "/p/" + pid
 	soup = make_soup(url) 	
 
@@ -90,29 +89,29 @@ def extract_text(pid, product_name):
 			pass
 
 	my_dict = {'name':'Itself', 'price':my_price, 'stars':my_stars, 'link':url, 'value':my_score, 'image':'Dummy Image Url'}	
-    
-    exist_flag = 0	
-    for i in other_products:	
+	
+	exist_flag = 0	
+	for i in other_products:	
 		if i['link'] == url:
 			exist_flag = 1
-            break
-    if exist_flag == 0:
-    	all_products.append(my_dict)
+			break
+	if exist_flag == 0:
+		all_products.append(my_dict)
 
 	sorted_products = sorted(all_products, key = lambda x:x['value'])
 	position = sorted_products.index(my_dict)
 
-    li['domain'] = 'www.flipkart.com'
-    li['_id'] = pid
+	li['domain'] = 'www.flipkart.com'
+	li['_id'] = pid
 	li['position'] = position
 	li['low-price'] = low_price
 	li['high-price'] = high_price
 	li['related_products'] = sorted_products
-    return li
+	return li
 
 def doit(pid, product_name):
 
-    list_of_reviews = extract_text(pid, product_name)
-    inserted_review = db.reviews.insert_one(list_of_reviews).inserted_id
-    print 'yahan bhi aagaya'
-    assert(inserted_review == pid)
+	list_of_reviews = extract_text(pid, product_name)
+	inserted_review = db.reviews.insert_one(list_of_reviews).inserted_id
+	print 'yahan bhi aagaya'
+	assert(inserted_review == pid)
