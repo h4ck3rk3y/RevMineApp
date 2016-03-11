@@ -38,11 +38,11 @@ def extract_text(pid, product_name):
 
 		for j, row in enumerate(soup('a',text='Permalink')):
 			li[str((page)*10 + (j + 1))]['link'] = row['href']
-	
+
 
 	#Extracting Alternatives!
 	url = "http://www.flipkart.com/" + product_name + "/p/" + pid
-	soup = make_soup(url) 	
+	soup = make_soup(url)
 
 	breadcrumb = soup.findAll('div',{'class':'breadcrumb-wrap line'})
 	taxonomies = breadcrumb[0].find_all('a',{'class':'fk-inline-block'})
@@ -59,14 +59,14 @@ def extract_text(pid, product_name):
 		title = p['title']
 		prices = [int(s) for s in title.split() if s.isdigit()]
 		if len(prices) == 2 and my_price < prices[1] and my_price > prices[0]:
-			url_split = all_products_url.split('?') 			
-			new_all_products_url = 'http://www.flipkart.com' + url_split[0] + "?p%5B%5D=facets.price_range%255B%255D%3DRs.%2B" + str(prices[0]) + "%2B-%2BRs.%2B" + str(prices[1]) + "&" + url_split[1]					
+			url_split = all_products_url.split('?')
+			new_all_products_url = 'http://www.flipkart.com' + url_split[0] + "?p%5B%5D=facets.price_range%255B%255D%3DRs.%2B" + str(prices[0]) + "%2B-%2BRs.%2B" + str(prices[1]) + "&" + url_split[1]
 			low_price = prices[0]
 			high_price = prices[1]
 			break
 		if len(prices) == 1 and my_price > prices[0]:
-			url_split = all_products_url.split('?') 			
-			new_all_products_url = 'http://www.flipkart.com' + url_split[0] + "?p%5B%5D=facets.price_range%255B%255D%3DRs.%2B" + str(prices[0]) + "%2Band%2BAbove&" + url_split[1]	
+			url_split = all_products_url.split('?')
+			new_all_products_url = 'http://www.flipkart.com' + url_split[0] + "?p%5B%5D=facets.price_range%255B%255D%3DRs.%2B" + str(prices[0]) + "%2Band%2BAbove&" + url_split[1]
 			low_price = prices[0]
 			high_price = 'Infinity!'
 			break
@@ -89,10 +89,10 @@ def extract_text(pid, product_name):
 		except:
 			pass
 
-	my_dict = {'name':'Itself', 'price':my_price, 'rating':my_stars, 'link':url, 'value':my_score, 'image':'Dummy Image Url'}	
-	
-	exist_flag = 0	
-	for i in all_products:	
+	my_dict = {'name':'Itself', 'price':my_price, 'rating':my_stars, 'link':url, 'value':my_score, 'image':'Dummy Image Url'}
+
+	exist_flag = 0
+	for i in all_products:
 		if i['link'] == url:
 			exist_flag = 1
 			break

@@ -15,14 +15,14 @@ reviews = db.reviews
 done = db.done
 recom = db.recom
 
-			
+
 def get_details(all_products_url):
-	
+
 	soup = make_soup(all_products_url)
 	res = soup.findAll('li',{'class':'s-result-item  celwidget '})
 
 	related_products = []
-	
+
 	for i in res:
 		try:
 			name = i.find_all('a',{'class':"a-link-normal s-access-detail-page  a-text-normal"})
@@ -31,20 +31,20 @@ def get_details(all_products_url):
 			image = i.find_all('img')
 			product = {}
 			product['name'] = name[0]['title']
-			if len(name) == 0:		
+			if len(name) == 0:
 				continue
 			product['link'] = name[0]['href']
 			if len(cost) == 0:
 				continue
 			product['price'] = float(cost[0].text.strip().replace(",",""))
 			product['rating'] = float(stars[0].text.rstrip(" out of 5 stars"))
-			product['value'] = float(product['price'])/float(product['rating'])			
-			product['image'] = image[0]['src']			
+			product['value'] = float(product['price'])/float(product['rating'])
+			product['image'] = image[0]['src']
 			related_products.append(product)
 		except:
 			pass
 	return related_products
-	
+
 def main(pid, domain):
 	if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
 		doit(pid)
@@ -78,11 +78,11 @@ def extract_text(li):
 
 		for j, row in enumerate(soup('a', {'class': 'a-size-base a-link-normal review-title a-color-base a-text-bold'})):
 			li[str((page-1)*10 + (j + 1))]['link'] = row['href']
-	
-	#Extracting Alternatives!		
-	url = "http://www.amazon.in/dp/" + pid 
+
+	#Extracting Alternatives!
+	url = "http://www.amazon.in/dp/" + pid
 	soup = 	make_soup(url)
-	
+
 	spans = soup.findAll('span',{'class': 'a-list-item'})
 	for span in spans:
 		links = span.find_all('a',{'class':'a-link-normal a-color-tertiary'})
@@ -91,23 +91,23 @@ def extract_text(li):
 			category = links[0].text.strip()
 
 	star_elements = soup.findAll('i',{'class':'a-icon a-icon-star a-star-4'})
-	span = star_elements[0].find('span',{'class':'a-icon-alt'})	
+	span = star_elements[0].find('span',{'class':'a-icon-alt'})
 	stars = span.text.rstrip(' out of 5 stars')
 
 	span = soup.findAll('span',{'class':'a-size-medium a-color-price'})
 	if len(span) > 0:
 		price = float(span[0].text.strip().replace(",",""))
-	
+
 	price_range = get_price_range(price)
 	all_products_url = "http://amazon.in" + next_url + '&low-price=' + str(price_range[0]) + '&high-price=' + str(price_range[1])
 
 	details = get_details(all_products_url)
-	own_score = float(price)/float(stars)	
+	own_score = float(price)/float(stars)
 
-	my_dict = {'name':'Itself', 'price':price, 'rating':stars, 'link':url, 'value':own_score, 'image':'Dummy Image Url'}	
-	
-	exist_flag = 0	
-	for i in details:	
+	my_dict = {'name':'Itself', 'price':price, 'rating':stars, 'link':url, 'value':own_score, 'image':'Dummy Image Url'}
+
+	exist_flag = 0
+	for i in details:
 		if i['link'] == url:
 			exist_flag = 1
 			break
