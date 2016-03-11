@@ -68,7 +68,7 @@ def extract_text(pid, product_name):
 			url_split = all_products_url.split('?')
 			new_all_products_url = 'http://www.flipkart.com' + url_split[0] + "?p%5B%5D=facets.price_range%255B%255D%3DRs.%2B" + str(prices[0]) + "%2Band%2BAbove&" + url_split[1]
 			low_price = prices[0]
-			high_price = 'Infinity!'
+			high_price = 200000
 			break
 
 	soup = make_soup(new_all_products_url)
@@ -105,7 +105,7 @@ def extract_text(pid, product_name):
 	li['domain'] = 'www.flipkart.com'
 	li['_id'] = pid
 	li['category'] = category
-	li['position'] = position
+	li['rank'] = position
 	li['low-price'] = low_price
 	li['high-price'] = high_price
 	li['related_products'] = sorted_products

@@ -52,7 +52,7 @@ def extract_text(pid, product_name):
 
 		li['related_products'] = sorted(related_products,key=lambda k: k['value'])
 
-		li['price'] = price
+		li['price'] = price.replace(',', '')
 		li['category'] = soup('a', {'class' : "bCrumbOmniTrack"})[-1].span.text
 
 		rank = -1

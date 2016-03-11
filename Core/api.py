@@ -6,7 +6,7 @@ import time
 
 app = FlaskAPI(__name__)
 client = MongoClient('mongodb://localhost:27017/')
-db = client.revmine
+db = client.revmine_2
 
 def create_rev(domain, pid, product_name):
     try:
@@ -17,7 +17,7 @@ def create_rev(domain, pid, product_name):
         if foo:
             return foo
         else:
-            return {'status':69, 'result':110, 'reviews':['Not Applicable'], 'valid':0}
+            return {'status':69, 'result':110, 'reviews':['Not Applicable'],  'valid':0}
     except:
         return {'status':69, 'result':100, 'reviews':['Not Applicable'], 'valid':0}
 
@@ -42,7 +42,14 @@ def getRatings(domain,pid,product_name=None):
             return {'status':69, 'result':100, 'reviews':['Not Applicable']}
 
     if foo and foo.has_key('topics'):
-        return {'result': foo['topics'], 'reviews':foo['sentences'], 'status':200, 'upvotes': upvotes}
+    	item = db.reviews.find_one({'_id': pid, 'domain': domain})
+    	rank = item['rank']
+    	category = item['category']
+    	low_price= item['low-price']
+    	high_price= item['high-price']
+    	if rank  != -1:
+    		message = "This product ranks %d in category %s in the range Rs %d- Rs %d" %(rank, category, low_price, high_price)
+        return {'result': foo['topics'], 'reviews':foo['sentences'], 'message': message, 'rank': item['rank'], 'title': item['title'], 'related_products' : item['related_products'], 'status':200, 'upvotes': upvotes}
     else:
         return {'status': 100, 'reviews':['Not Applicable'], 'result': 100}
 

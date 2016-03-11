@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 
 def get_price_range(price):
-	
+
 	if price >= 0 and price < 1000:
 		return (price-100,price+100)
 	if price >= 1000 and price < 5000:
@@ -16,9 +16,9 @@ def get_price_range(price):
 	if price >= 40000 and price < 60000:
 		return (price-6000,price+6000)
 	if price >= 60000:
-		return (0.9*price,1.15*price)
+		return (int(0.9*price),int(1.15*price))
 
 def make_soup(url):
-	r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0'})	
+	r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0'})
 	return BeautifulSoup(r.text.encode('utf-8'))
 

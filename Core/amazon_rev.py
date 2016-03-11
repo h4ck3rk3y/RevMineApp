@@ -117,7 +117,7 @@ def extract_text(li):
 
 	sorted_products = sorted(details, key = lambda x:x['value'])
 	position = sorted_products.index(my_dict)
-	li['position'] = position
+	li['rank'] = position
 	li['low-price'] = price_range[0]
 	li['high-price'] = price_range[1]
 	li['related_products'] = sorted_products
