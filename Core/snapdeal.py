@@ -3,7 +3,7 @@ import requests
 from pymongo import MongoClient
 import re
 from datetime import datetime
-
+from util import get_price_range
 snapdeal_link = "http://www.snapdeal.com/product/%s/%s/ratedreviews?page=%d&sortBy=HELPFUL&ratings=1,2,3,4,5#defRevPDP"
 
 
