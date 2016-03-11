@@ -44,7 +44,7 @@ def get_details(all_products_url):
 				continue
 			product['price'] = float(cost[0].text.strip().replace(",",""))
 			product['stars'] = float(stars[0].text.rstrip(" out of 5 stars"))
-			product['score'] = float(product['price'])/float(product['stars'])			
+			product['value'] = float(product['price'])/float(product['stars'])			
 			product['image'] = image[0]['src']			
 			related_products.append(product)
 		except:
@@ -76,12 +76,19 @@ def get_amazon_ranks(pid):
 	details = get_details(all_products_url)
 	own_score = float(price)/float(stars)	
 
-	my_dict = {'name':'Itself', 'price':price, 'stars':stars, 'link':url, 'score':own_score, 'image':'Dummy Image Url'}	
-	details.append(my_dict)
+	my_dict = {'name':'Itself', 'price':price, 'stars':stars, 'link':url, 'value':own_score, 'image':'Dummy Image Url'}	
+    
+    exist_flag = 0	
+    for i in other_products:	
+		if i['link'] == url:
+			exist_flag = 1
+            break
+    if exist_flag == 0:
+    	all_products.append(my_dict)	
+    details.append(my_dict)
 
 	sorted_products = sorted(details, key = lambda x:x['score'])
 	position = sorted_products.index(my_dict)
-	sorted_products.remove(my_dict)
 	final = {}
 	final['position'] = position
 	final['low-price'] = price_range[0]
@@ -89,9 +96,9 @@ def get_amazon_ranks(pid):
 	final['items'] = sorted_products
 	return final
 
-def get_flipkart_ranks(pid, name):
+def get_flipkart_ranks(pid, product_name):
 	
-	url = "http://www.flipkart.com/" + name + "/p/" + pid
+	url = "http://www.flipkart.com/" + product_name + "/p/" + pid
 	soup = make_soup(url) 	
 
 	breadcrumb = soup.findAll('div',{'class':'breadcrumb-wrap line'})
@@ -133,17 +140,23 @@ def get_flipkart_ranks(pid, name):
 			name_title = i.find('div',{'class':'pu-title fk-font-13'}).find('a')
 			this_product['name'] = name_title['title']
 			this_product['link'] = 'http://www.flipkart.com' + name_title['href']
-			this_product['score'] = float(this_product['price'])/float(this_product['stars'])
+			this_product['value'] = float(this_product['price'])/float(this_product['stars'])
 			all_products.append(this_product)
 		except:
 			pass
 
-	my_dict = {'name':'Itself', 'price':my_price, 'stars':my_stars, 'link':url, 'score':my_score, 'image':'Dummy Image Url'}	
-	all_products.append(my_dict)
+	my_dict = {'name':'Itself', 'price':my_price, 'stars':my_stars, 'link':url, 'value':my_score, 'image':'Dummy Image Url'}	
+    
+    exist_flag = 0	
+    for i in other_products:	
+		if i['link'] == url:
+			exist_flag = 1
+            break
+    if exist_flag == 0:
+    	all_products.append(my_dict)
 
 	sorted_products = sorted(all_products, key = lambda x:x['score'])
 	position = sorted_products.index(my_dict)
-	sorted_products.remove(my_dict)
 	final = {}
 	final['position'] = position
 	final['low-price'] = low_price
