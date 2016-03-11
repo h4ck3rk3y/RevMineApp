@@ -47,6 +47,7 @@ def extract_text(pid, product_name):
 	breadcrumb = soup.findAll('div',{'class':'breadcrumb-wrap line'})
 	taxonomies = breadcrumb[0].find_all('a',{'class':'fk-inline-block'})
 	all_products_url = taxonomies[-2]['href']
+	category = taxonomies[-2].text.strip()
 
 	my_price = float(soup.find('span',{'class':'selling-price omniture-field'})['data-evar48'])
 	my_stars = float(soup.find('div',{'class':'bigStar'}).text)
@@ -91,7 +92,7 @@ def extract_text(pid, product_name):
 	my_dict = {'name':'Itself', 'price':my_price, 'stars':my_stars, 'link':url, 'value':my_score, 'image':'Dummy Image Url'}	
 	
 	exist_flag = 0	
-	for i in other_products:	
+	for i in all_products:	
 		if i['link'] == url:
 			exist_flag = 1
 			break
@@ -103,6 +104,7 @@ def extract_text(pid, product_name):
 
 	li['domain'] = 'www.flipkart.com'
 	li['_id'] = pid
+	li['category'] = category
 	li['position'] = position
 	li['low-price'] = low_price
 	li['high-price'] = high_price

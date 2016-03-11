@@ -88,7 +88,8 @@ def extract_text(li):
 		links = span.find_all('a',{'class':'a-link-normal a-color-tertiary'})
 		if len(links)>0:
 			next_url = links[0]['href']
-	
+			category = links[0].text.strip()
+
 	star_elements = soup.findAll('i',{'class':'a-icon a-icon-star a-star-4'})
 	span = star_elements[0].find('span',{'class':'a-icon-alt'})	
 	stars = span.text.rstrip(' out of 5 stars')
@@ -106,7 +107,7 @@ def extract_text(li):
 	my_dict = {'name':'Itself', 'price':price, 'stars':stars, 'link':url, 'value':own_score, 'image':'Dummy Image Url'}	
 	
 	exist_flag = 0	
-	for i in other_products:	
+	for i in details:	
 		if i['link'] == url:
 			exist_flag = 1
 			break
@@ -120,6 +121,7 @@ def extract_text(li):
 	li['low-price'] = price_range[0]
 	li['high-price'] = price_range[1]
 	li['related_products'] = sorted_products
+	li['category'] = category
 	li['domain'] ='www.amazon.in'
 	return li
 
