@@ -51,7 +51,7 @@ def main(pid, domain):
 
 def extract_text(li):
 	count = 0
-	for page in range(1,2):
+	for page in range(1,6):
 		# Page 1 soup!
 		url_ = amazon_link % (li["_id"], page)
 		print "Trying " + url_ + " now!"
