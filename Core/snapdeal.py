@@ -31,6 +31,8 @@ def extract_text(pid, product_name):
 		li['title'] = soup('span', {'class': 'section-head customer_review_tab'})[0].text
 		price = soup('span', {'class', 'payBlkBig'})[0].text
 		category_link = pages_link = soup('a', {'class' : "bCrumbOmniTrack"})[-1]['href']  + "?sort=plrty&q=Price:" + ",".get_price_range(price)
+		li['low-price'] = get_price_range(price)[0]
+		li['high-price'] = get_price_range(price)[1]
 
 		related_products = []
 
@@ -46,14 +48,14 @@ def extract_text(pid, product_name):
 				price = temp_soup('span',{'class': 'product-price'} )[0].text
 				rating = temp_soup('div', {'class': 'filled-stars'})[0]['style'][6:-1]
 				rating = float(rating) * 0.05
-				related_products.append({'image': image, 'name': name, 'price': price, 'rating': rating, 'value': rating/float(price)})
+				related_products.append({'image': image, 'name': name, 'price': price, 'rating': rating, 'value': float(price)/rating})
 
-		li['related_products'] = sorted(related_products,key=lambda k: k['value'], reverse=True)
+		li['related_products'] = sorted(related_products,key=lambda k: k['value'])
 
 		li['price'] = price
 		li['category'] = soup('a', {'class' : "bCrumbOmniTrack"})[-1].span.text
 
-		rank = 0
+		rank = -1
 
 		for x in li['related_products']:
 			rank = i + 1
