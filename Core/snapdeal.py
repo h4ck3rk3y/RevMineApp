@@ -23,6 +23,7 @@ def extract_text(pid, product_name):
 		try:
 			response = requests.get(url_)
 			if response.status_code == 200:
+				print 'puthe chala'
 				soup = BeautifulSoup(response.text)
 			else:
 				continue

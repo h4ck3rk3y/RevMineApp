@@ -19,8 +19,7 @@ recom = db.recom
 def get_details(all_products_url):
 
 	soup = make_soup(all_products_url)
-	res = soup.findAll('li',{'class':'s-result-item  celwidget '})
-
+	res = soup.findAll('li',{'class':'s-result-item'})
 	related_products = []
 
 	for i in res:
@@ -36,12 +35,13 @@ def get_details(all_products_url):
 			product['link'] = name[0]['href']
 			if len(cost) == 0:
 				continue
-			product['price'] = float(cost[0].text.strip().replace(",",""))
+			product['price'] = float(cost[-1].text.strip().replace(",",""))
 			product['rating'] = float(stars[0].text.rstrip(" out of 5 stars"))
 			product['value'] = float(product['price'])/float(product['rating'])
 			product['image'] = image[0]['src']
 			related_products.append(product)
 		except:
+			import traceback; traceback.print_exc();
 			pass
 	return related_products
 
@@ -51,7 +51,7 @@ def main(pid, domain):
 
 def extract_text(li):
 	count = 0
-	for page in range(1,6):
+	for page in range(1,2):
 		# Page 1 soup!
 		url_ = amazon_link % (li["_id"], page)
 		print "Trying " + url_ + " now!"
@@ -96,7 +96,7 @@ def extract_text(li):
 
 	price_range = get_price_range(price)
 	all_products_url = "http://amazon.in" + next_url + '&low-price=' + str(price_range[0]) + '&high-price=' + str(price_range[1])
-
+	print all_products_url
 	details = get_details(all_products_url)
 	own_score = float(price)/float(stars)
 

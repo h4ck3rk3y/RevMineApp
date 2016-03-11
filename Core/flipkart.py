@@ -66,12 +66,20 @@ def extract_text(pid, product_name):
 			low_price = prices[0]
 			high_price = prices[1]
 			break
-		if len(prices) == 1 and my_price > prices[0]:
+		if len(prices) == 1 and my_price >= prices[0] and 'Above' in title:
 			url_split = all_products_url.split('?')
 			new_all_products_url = 'http://www.flipkart.com' + url_split[0] + "?p%5B%5D=facets.price_range%255B%255D%3DRs.%2B" + str(prices[0]) + "%2Band%2BAbove&" + url_split[1]
 			low_price = prices[0]
 			high_price = 200000
 			break
+		if len(prices) == 1 and my_price <= prices[0] and 'Below' in title:
+			url_split = all_products_url.split('?')
+			new_all_products_url = 'http://www.flipkart.com' + url_split[0] + "?p%5B%5D=facets.price_range%255B%255D%3DRs.%2B" + str(prices[0]) + "%2Band%2BBelow&" + url_split[1]
+			high_price = prices[0]
+			low_price = 0
+			break
+
+
 	soup = make_soup(new_all_products_url)
 	other_products = soup.findAll('div',{'class':'product-unit'})
 	all_products = []
@@ -79,8 +87,8 @@ def extract_text(pid, product_name):
 		try:
 			this_product = {}
 			this_product['image'] = i.find('img')['data-src']
-			this_product['price'] = float(i.find('span',{'class':'fk-font-17 fk-bold 11'}).text.lstrip('Rs. ').replace(",",""))
-			this_product['rating'] = float(i.find('div',{'class':'fk-stars-small'})['title'].rstrip(' star'))
+			this_product['price'] = float(i.find('span',{'class':'fk-font-17'}).text.lstrip('Rs. ').replace(",",""))
+			this_product['rating'] = round(float(i('div', {'class': 'rating'})[0]['style'][6:-2])*0.05,2)
 			name_title = i.find('div',{'class':'pu-title fk-font-13'}).find('a')
 			this_product['name'] = name_title['title']
 			this_product['link'] = 'http://www.flipkart.com' + name_title['href']

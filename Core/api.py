@@ -42,14 +42,16 @@ def getRatings(domain,pid,product_name=None):
             import traceback; traceback.print_exc();
             return {'status':69, 'result':100, 'reviews':['Not Applicable']}
 
-    if foo and foo.has_key('topics'):
+    if foo and foo.has_key('topics') and len(foo['topics']) != 0:
     	item = db.reviews.find_one({'_id': pid, 'domain': domain})
-    	rank = item['rank']
+    	ranked = -1
+        if item.has_key('rank'):
+            ranked = item['rank']
     	category = item['category']
     	low_price= item['low-price']
     	high_price= item['high-price']
-    	if rank  != -1:
-    		message = "This product ranks %d in category `%s` in the range Rs %d - Rs %d. Following are the top products in the given range." %(rank, category, low_price, high_price)
+    	if ranked  != -1:
+    		message = "This product ranks %d in category `%s` in the range Rs %d - Rs %d. Following are the top products in the given range." %(ranked, category, low_price, high_price)
         else:
             message = "This product doesn't rank well in category `%s` and price range Rs %d - Rs %d, here are the top products" %(category, low_price, high_price)
         return {'result': foo['topics'], 'reviews':foo['sentences'], 'message': message, 'name': item['title'], 'related_products' : item['related_products'], 'status':200, 'upvotes': upvotes}

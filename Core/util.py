@@ -3,7 +3,7 @@ import requests
 
 def get_price_range(price):
 	if price >= 0 and price < 1000:
-		return (price-100,price+100)
+		return (max(price-100,0),price+100)
 	if price >= 1000 and price < 5000:
 		return (price-750,price+750)
 	if price >= 5000 and price < 10000:
