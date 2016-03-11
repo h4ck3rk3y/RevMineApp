@@ -18,7 +18,7 @@ def main(pid, product_name, domain):
 def extract_text(pid, product_name):
 	li = {}
 	count = 0
-	for page in range(1,2):
+	for page in range(1,6):
 		url_ = snapdeal_link % (product_name, pid, page)
 		try:
 			response = requests.get(url_)

@@ -19,7 +19,7 @@ def main(pid, product_name, domain):
 def extract_text(pid, product_name):
 	li = {}
 	count = 0
-	for page in range(0,1):
+	for page in range(0,5):
 		url_ = flipkart_link % (product_name, pid, page*10)
 		print url_
 		try:
