@@ -50,18 +50,18 @@ def extract_text(pid, product_name):
 				rating = float(rating) * 0.05
 				related_products.append({'image': image, 'name': name, 'price': price, 'rating': rating, 'value': float(price)/rating})
 
-		li['related_products'] = sorted(related_products,key=lambda k: k['value'])
+				li['related_products'] = sorted(related_products,key=lambda k: k['value'])
 
-		li['price'] = price.replace(',', '')
-		li['category'] = soup('a', {'class' : "bCrumbOmniTrack"})[-1].span.text
+				li['price'] = price.replace(',', '')
+				li['category'] = soup('a', {'class' : "bCrumbOmniTrack"})[-1].span.text
 
-		rank = -1
+				rank = -1
 
-		for x in li['related_products']:
-			rank = i + 1
-			if x['name'] == li['title']:
-				break
-		li['rank'] = rank
+				for x in li['related_products']:
+					rank = i + 1
+					if x['name'] == li['title']:
+						break
+				li['rank'] = rank
 
 		except:
 			print 'something awful happened getting related products'

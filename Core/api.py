@@ -48,8 +48,8 @@ def getRatings(domain,pid,product_name=None):
     	low_price= item['low-price']
     	high_price= item['high-price']
     	if rank  != -1:
-    		message = "This product ranks %d in category %s in the range Rs %d- Rs %d" %(rank, category, low_price, high_price)
-        return {'result': foo['topics'], 'reviews':foo['sentences'], 'message': message, 'rank': item['rank'], 'title': item['title'], 'related_products' : item['related_products'], 'status':200, 'upvotes': upvotes}
+    		message = "This product ranks %d in category %s in the range Rs %d- Rs %d. Following are the top products in the given range." %(rank, category, low_price, high_price)
+        return {'result': foo['topics'], 'reviews':foo['sentences'], 'message': message, 'name': item['title'], 'related_products' : item['related_products'], 'status':200, 'upvotes': upvotes}
     else:
         return {'status': 100, 'reviews':['Not Applicable'], 'result': 100}
 
