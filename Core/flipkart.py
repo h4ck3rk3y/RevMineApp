@@ -80,16 +80,16 @@ def extract_text(pid, product_name):
 			this_product = {}
 			this_product['image'] = i.find('img')['data-src']
 			this_product['price'] = float(i.find('span',{'class':'fk-font-17 fk-bold 11'}).text.lstrip('Rs. ').replace(",",""))
-			this_product['stars'] = float(i.find('div',{'class':'fk-stars-small'})['title'].rstrip(' star'))
+			this_product['rating'] = float(i.find('div',{'class':'fk-stars-small'})['title'].rstrip(' star'))
 			name_title = i.find('div',{'class':'pu-title fk-font-13'}).find('a')
 			this_product['name'] = name_title['title']
 			this_product['link'] = 'http://www.flipkart.com' + name_title['href']
-			this_product['value'] = float(this_product['price'])/float(this_product['stars'])
+			this_product['value'] = float(this_product['price'])/float(this_product['rating'])
 			all_products.append(this_product)
 		except:
 			pass
 
-	my_dict = {'name':'Itself', 'price':my_price, 'stars':my_stars, 'link':url, 'value':my_score, 'image':'Dummy Image Url'}	
+	my_dict = {'name':'Itself', 'price':my_price, 'rating':my_stars, 'link':url, 'value':my_score, 'image':'Dummy Image Url'}	
 	
 	exist_flag = 0	
 	for i in all_products:	

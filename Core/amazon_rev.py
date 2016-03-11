@@ -37,8 +37,8 @@ def get_details(all_products_url):
 			if len(cost) == 0:
 				continue
 			product['price'] = float(cost[0].text.strip().replace(",",""))
-			product['stars'] = float(stars[0].text.rstrip(" out of 5 stars"))
-			product['value'] = float(product['price'])/float(product['stars'])			
+			product['rating'] = float(stars[0].text.rstrip(" out of 5 stars"))
+			product['value'] = float(product['price'])/float(product['rating'])			
 			product['image'] = image[0]['src']			
 			related_products.append(product)
 		except:
@@ -104,7 +104,7 @@ def extract_text(li):
 	details = get_details(all_products_url)
 	own_score = float(price)/float(stars)	
 
-	my_dict = {'name':'Itself', 'price':price, 'stars':stars, 'link':url, 'value':own_score, 'image':'Dummy Image Url'}	
+	my_dict = {'name':'Itself', 'price':price, 'rating':stars, 'link':url, 'value':own_score, 'image':'Dummy Image Url'}	
 	
 	exist_flag = 0	
 	for i in details:	
