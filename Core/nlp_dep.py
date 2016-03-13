@@ -38,6 +38,13 @@ stop.append('usage')
 stop.append('product')
 stop.append('quality')
 
+def pie_chart(noun_scores, topics):
+	pie = {}
+	sum_score = sum(noun_scores[i] for i in topics if i in noun_scores)
+	for i in topics:
+		if i in noun_scores:
+			pie[i] = round(float(noun_scores[i]/sum_score)*100,2)
+	return pie
 
 def strip_proppers_POS(text):
 	tokens = nltk.word_tokenize(text)
@@ -179,6 +186,9 @@ def doit(pid, domain):
 	result['valid'] = 1
 	result['topics'] = topics
 
+	pie = pie_chart({x[0]:x[1][0] for x in noun_scores}, [x for x in topics] )
+	result['pie_chart'] = pie
+
 	final_sentences = []
 	topics_selected = []
 	for i in revsSelected:
@@ -190,4 +200,3 @@ def doit(pid, domain):
 	#pprint(result)
 	result_db.insert(result)
 	return True
-#doit('B012II9E6C','www.amazon.in')
