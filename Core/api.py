@@ -54,7 +54,7 @@ def getRatings(domain,pid,product_name=None):
     		message = "This product ranks %d in category `%s` in the range Rs %d - Rs %d. Following are the top products in the given range." %(ranked, category, low_price, high_price)
         else:
             message = "This product doesn't rank well in category `%s` and price range Rs %d - Rs %d, here are the top products" %(category, low_price, high_price)
-        return {'result': foo['topics'], 'pie_chart': foo['pie_chart'] 'reviews':foo['sentences'], 'message': message, 'name': item['title'], 'related_products' : item['related_products'], 'status':200, 'upvotes': upvotes}
+        return {'result': foo['topics'], 'pie_chart': foo['pie_chart'], 'reviews':foo['sentences'], 'message': message, 'name': item['title'], 'related_products' : item['related_products'], 'status':200, 'upvotes': upvotes}
     else:
         return {'status': 100, 'reviews':['Not Applicable'], 'result': 100}
 
