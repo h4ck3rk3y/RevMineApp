@@ -20,7 +20,7 @@ import inflect
 #client = MongoClient('10.42.0.16')
 client = MongoClient('mongodb://localhost:27017')
 #client = MongoClient('172.17.30.135')
-db = client.revmine
+db = client.revmine_2
 reviews = db.reviews
 result_db = db.result
 p = inflect.engine()
@@ -38,6 +38,13 @@ stop.append('usage')
 stop.append('product')
 stop.append('quality')
 
+def pie_chart(noun_scores, topics):
+	pie = {}
+	sum_score = sum(noun_scores[i] for i in topics if i in noun_scores)
+	for i in topics:
+		if i in noun_scores:
+			pie[i] = round(float(noun_scores[i]/sum_score)*100,2)
+	return pie
 
 def strip_proppers_POS(text):
 	tokens = nltk.word_tokenize(text)
@@ -74,11 +81,11 @@ def doit(pid, domain):
 	rights = {}
 
 	print "In Doit"
-	i = reviews.find_one({"_id":pid})
+	i = reviews.find_one({"_id":pid, 'domain': domain})
 	title = nltk.word_tokenize(i['title'].lower())
 	for y in title:
 		stop.append(y)
-	for j in range(1,min(len(i)-2,50)):
+	for j in range(1,min(int(i['count']),50)):
 		sents = nltk.sent_tokenize(i[str(j)]['text'].lower())
 		link = i[str(j)]['link']
 		for sent in sents:
@@ -179,6 +186,9 @@ def doit(pid, domain):
 	result['valid'] = 1
 	result['topics'] = topics
 
+	pie = pie_chart({x[0]:x[1][0] for x in noun_scores}, [x for x in topics] )
+	result['pie_chart'] = pie
+
 	final_sentences = []
 	topics_selected = []
 	for i in revsSelected:
@@ -190,4 +200,3 @@ def doit(pid, domain):
 	#pprint(result)
 	result_db.insert(result)
 	return True
-#doit('B012II9E6C','www.amazon.in')

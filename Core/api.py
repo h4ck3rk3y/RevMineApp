@@ -6,7 +6,7 @@ import time
 
 app = FlaskAPI(__name__)
 client = MongoClient('mongodb://localhost:27017/')
-db = client.revmine
+db = client.revmine_2
 
 def create_rev(domain, pid, product_name):
     try:
@@ -17,7 +17,7 @@ def create_rev(domain, pid, product_name):
         if foo:
             return foo
         else:
-            return {'status':69, 'result':110, 'reviews':['Not Applicable'], 'valid':0}
+            return {'status':69, 'result':110, 'reviews':['Not Applicable'],  'valid':0}
     except:
         return {'status':69, 'result':100, 'reviews':['Not Applicable'], 'valid':0}
 
@@ -39,10 +39,22 @@ def getRatings(domain,pid,product_name=None):
         try:
             foo = create_rev(domain , pid, product_name)
         except:
+            import traceback; traceback.print_exc();
             return {'status':69, 'result':100, 'reviews':['Not Applicable']}
 
-    if foo and foo.has_key('topics'):
-        return {'result': foo['topics'], 'reviews':foo['sentences'], 'status':200, 'upvotes': upvotes}
+    if foo and foo.has_key('topics') and len(foo['topics']) != 0:
+    	item = db.reviews.find_one({'_id': pid, 'domain': domain})
+    	ranked = -1
+        if item.has_key('rank'):
+            ranked = item['rank']
+    	category = item['category']
+    	low_price= item['low-price']
+    	high_price= item['high-price']
+    	if ranked  != -1:
+    		message = "This product ranks %d in category `%s` in the range Rs %d - Rs %d. Following are the top products in the given range." %(ranked, category, low_price, high_price)
+        else:
+            message = "This product doesn't rank well in category `%s` and price range Rs %d - Rs %d, here are the top products" %(category, low_price, high_price)
+        return {'result': foo['topics'], 'pie_chart': foo['pie_chart'], 'reviews':foo['sentences'], 'message': message, 'name': item['title'], 'related_products' : item['related_products'], 'status':200, 'upvotes': upvotes}
     else:
         return {'status': 100, 'reviews':['Not Applicable'], 'result': 100}
 
