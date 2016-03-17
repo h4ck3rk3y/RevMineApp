@@ -27,6 +27,7 @@ def get_details(all_products_url):
 			name = i.find_all('a',{'class':"a-link-normal s-access-detail-page  a-text-normal"})
 			cost = i.find_all('span',{'class':'a-size-base a-color-price s-price a-text-bold'})
 			stars = i.find_all('span',{'class':"a-icon-alt"})
+
 			image = i.find_all('img')
 			product = {}
 			product['name'] = name[0]['title']
@@ -36,7 +37,7 @@ def get_details(all_products_url):
 			if len(cost) == 0:
 				continue
 			product['price'] = float(cost[-1].text.strip().replace(",",""))
-			product['rating'] = float(stars[0].text.rstrip(" out of 5 stars"))
+			product['rating'] = float(stars[0].text.split()[0])
 			product['value'] = float(product['price'])/float(product['rating'])
 			product['image'] = image[0]['src']
 			related_products.append(product)

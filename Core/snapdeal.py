@@ -15,7 +15,7 @@ def main(pid, product_name, domain):
 	if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
 		doit(pid, product_name)
 
-li = {}
+
 def extract_text(pid, product_name):
 	li = {}
 	count = 0
