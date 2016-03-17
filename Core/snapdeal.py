@@ -15,6 +15,7 @@ def main(pid, product_name, domain):
 	if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
 		doit(pid, product_name)
 
+li = {}
 def extract_text(pid, product_name):
 	li = {}
 	count = 0
@@ -23,16 +24,17 @@ def extract_text(pid, product_name):
 		try:
 			response = requests.get(url_)
 			if response.status_code == 200:
-				print 'puthe chala'
+				print url_
 				soup = BeautifulSoup(response.text)
 			else:
 				continue
 		except:
+			continue
 			print 'something awful just happened'
 
 		li['title'] = soup('span', {'class': 'section-head customer_review_tab'})[0].text
 		# will scrape reviews' text
-		for j, row in enumerate(soup('div', {'class': 'user-review'})):
+		for j, row in enumerate(soup('div', {'class': 'user-review'})[2:]):
 			count +=1
 			li[str((page-1)*10 + (j + 1))] = {}
 			li[str((page-1)*10 + (j + 1))]['text'] = row.p.text
