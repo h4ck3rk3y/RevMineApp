@@ -86,6 +86,8 @@ def doit(pid, domain):
 	for y in title:
 		stop.append(y)
 	for j in range(1,min(int(i['count']),50)):
+                if not i.has_key(str(j)):
+			continue
 		sents = nltk.sent_tokenize(i[str(j)]['text'].lower())
 		link = i[str(j)]['link']
 		for sent in sents:
