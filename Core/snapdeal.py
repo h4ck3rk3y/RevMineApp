@@ -29,6 +29,7 @@ def extract_text(pid, product_name):
 			else:
 				continue
 		except:
+			continue
 			print 'something awful just happened'
 
 		li['title'] = soup('span', {'class': 'section-head customer_review_tab'})[0].text
