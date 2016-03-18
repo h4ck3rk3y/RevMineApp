@@ -14,7 +14,6 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client.revmine_2
 
 i = 0
-count = 0
 li = {}
 
 def main(pid, product_name, domain):
@@ -36,7 +35,6 @@ def handler(response):
 		return
 	global i
 	global li
-	global count
 	i -= 1
 	if i == 0:
 		ioloop.IOLoop.instance().stop()
@@ -49,7 +47,6 @@ def handler(response):
 	li['title'] = soup('img', {'onload':'img_onload(this);'})[0]["alt"]
 	for j, row in enumerate(soup('span', {'class': 'review-text'})):
 		li[str((page)*10 + (j + 1))] = {}
-		count = count + 1
 		li[str((page)*10 + (j + 1))]['text'] = row.text
 
 	for j, row in enumerate(soup('a',text='Permalink')):
@@ -145,12 +142,9 @@ def alternates(product_name, pid):
 def doit(pid, product_name):
 	extract_text(pid, product_name)
 	print 'extraction done?'
-	global count
 	global li
-	li['count'] = count
 	alternates(product_name, pid)
 	inserted_review = db.reviews.insert_one(li).inserted_id
-	count = 0
 	i = 0
 	li = {}
 	assert(inserted_review == pid)

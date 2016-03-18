@@ -14,7 +14,6 @@ db = client.revmine_2
 
 i = 0
 li = {}
-count = 0
 
 
 def main(pid, product_name, domain):
@@ -37,7 +36,6 @@ def handler(response):
 		return
 	global i
 	global li
-	global count
 	i -= 1
 	if i == 0:
 		ioloop.IOLoop.instance().stop()
@@ -48,7 +46,6 @@ def handler(response):
 	li['title'] = soup('span', {'class': 'section-head customer_review_tab'})[0].text
 	# will scrape reviews' text
 	for j, row in enumerate(soup('div', {'class': 'user-review'})[2:]):
-		count +=1
 		li[str((page-1)*10 + (j + 1))] = {}
 		li[str((page-1)*10 + (j + 1))]['text'] = row.p.text
 		li[str((page-1)*10 + (j + 1))]['link'] = response.effective_url
@@ -122,12 +119,9 @@ def alternates(product_name, pid):
 def doit(pid, product_name):
 	extract_text(pid, product_name)
 	print 'extraction done?'
-	global count
 	global li
-	li['count'] = count
 	alternates(product_name, pid)
 	inserted_review = db.reviews.insert_one(li).inserted_id
-	count = 0
 	i = 0
 	li = {}
 	assert(inserted_review == pid)

@@ -17,7 +17,6 @@ recom = db.recom
 
 i = 0
 li = {}
-count = 0
 
 def get_details(all_products_url):
 
@@ -69,7 +68,6 @@ def handler(response):
 		return
 	global i
 	global li
-	global count
 	i -= 1
 	if i == 0:
 		ioloop.IOLoop.instance().stop()
@@ -82,7 +80,6 @@ def handler(response):
 	for j, row in enumerate(soup('span', {'class': 'review-text'})):
 		li[str((page-1)*10 + (j + 1))] = {}
 		li[str((page-1)*10 + (j + 1))]['text'] = row.text
-		count +=1
 
 	for j, row in enumerate(soup('a', {'class': 'a-size-base a-link-normal review-title a-color-base a-text-bold'})):
 		li[str((page-1)*10 + (j + 1))]['link'] = row['href']
@@ -136,13 +133,10 @@ def alternates(pid):
 
 def doit(pid):
 	extract_text(pid)
-	global count
 	global li
 	li['_id'] = pid
-	li['count'] = count
 	alternates(pid)
 	inserted_review = db.reviews.insert_one(li).inserted_id
-	count = 0
 	i = 0
 	li = {}
 	assert(inserted_review == pid)
