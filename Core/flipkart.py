@@ -41,13 +41,12 @@ def handler(response):
 	i -= 1
 	if i == 0:
 		ioloop.IOLoop.instance().stop()
+
 	soup = BeautifulSoup(response.body)
 
 	p = re.compile('start=(\d+)')
 	page = int(re.findall(p, response.effective_url)[0])/10
-	f = open('sample', 'w')
-	f.write(response.body)
-	f.close()
+
 	li['title'] = soup('img', {'onload':'img_onload(this);'})[0]["alt"]
 	for j, row in enumerate(soup('span', {'class': 'review-text'})):
 		li[str((page)*10 + (j + 1))] = {}
