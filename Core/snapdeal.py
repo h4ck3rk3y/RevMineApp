@@ -117,7 +117,6 @@ def alternates(product_name, pid):
 
 	li['domain'] = 'www.snapdeal.com'
 	li['_id'] = pid
-	return li
 
 
 def doit(pid, product_name):
