@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 from util import make_soup
 from tornado import ioloop, httpclient
-
+import functools
 
 flipkart_link = "http://www.flipkart.com/%s/product-reviews/%s?type=top&start=%d"
 
@@ -13,30 +13,26 @@ client = MongoClient('mongodb://localhost:27017/')
 
 db = client.revmine_2
 
-i = 0
-li = {}
 
 def main(pid, product_name, domain):
 	if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
 		doit(pid, product_name)
 
-def extract_text(pid, product_name):
+def extract_text(pid, product_name, li):
 	http_client = httpclient.AsyncHTTPClient()
 	for page in range(0,5):
 		url_ = flipkart_link % (product_name, pid, page*10)
 		print url_
-		global i
-		i+=1
-		http_client.fetch(url_, handler)
+		li['i'] += 1
+		cb = functools.partial(handler, li)
+		http_client.fetch(url_, cb)
 	ioloop.IOLoop.instance().start()
 
-def handler(response):
+def handler(li, response):
 	if response.code != 200:
 		return
-	global i
-	global li
-	i -= 1
-	if i == 0:
+	li['i'] -= 1
+	if li['i'] == 0:
 		ioloop.IOLoop.instance().stop()
 
 	soup = BeautifulSoup(response.body)
@@ -54,8 +50,7 @@ def handler(response):
 
 
 #Extracting Alternatives!
-def alternates(product_name, pid):
-	global li
+def alternates(product_name, pid, li):
 	url = "http://www.flipkart.com/" + product_name + "/p/" + pid.lower()
 	print url
 	soup = make_soup(url)
@@ -140,11 +135,10 @@ def alternates(product_name, pid):
 
 
 def doit(pid, product_name):
-	extract_text(pid, product_name)
-	print 'extraction done?'
-	global li
-	alternates(product_name, pid)
-	inserted_review = db.reviews.insert_one(li).inserted_id
-	i = 0
 	li = {}
+	li['i'] = 0
+	extract_text(pid, product_name, li)
+	print 'extraction done?'
+	alternates(product_name, pid, li)
+	inserted_review = db.reviews.insert_one(li).inserted_id
 	assert(inserted_review == pid)

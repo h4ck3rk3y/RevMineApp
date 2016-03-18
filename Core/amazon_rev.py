@@ -5,18 +5,15 @@ import re
 from datetime import datetime
 from util import get_price_range,make_soup
 from tornado import ioloop, httpclient
+import functools
 
 amazon_link = "http://www.amazon.in/product-reviews/%s?sortBy=helpful&pageNumber=%d"
 
 client = MongoClient('mongodb://localhost:27017/')
-
 db = client.revmine_2
 reviews = db.reviews
 done = db.done
 recom = db.recom
-
-i = 0
-li = {}
 
 def get_details(all_products_url):
 
@@ -52,24 +49,21 @@ def main(pid, domain):
 	if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
 		doit(pid)
 
-def extract_text(pid):
+def extract_text(pid, i, li):
 	http_client = httpclient.AsyncHTTPClient()
 	for page in range(1,6):
 		url_ = amazon_link % (pid, page)
-		print url_
-		global i
-		i+=1
-		http_client.fetch(url_, handler)
+		li['i'] += 1
+		cb = functools.partial(handler, li)
+		http_client.fetch(url_, cb)
 	ioloop.IOLoop.instance().start()
 
 
-def handler(response):
+def handler(li, response):
 	if response.code != 200:
 		return
-	global i
-	global li
-	i -= 1
-	if i == 0:
+	li['i'] -= 1
+	if li['i'] == 0:
 		ioloop.IOLoop.instance().stop()
 	soup = BeautifulSoup(response.body)
 	# will scrape reviews' text
@@ -84,8 +78,7 @@ def handler(response):
 	for j, row in enumerate(soup('a', {'class': 'a-size-base a-link-normal review-title a-color-base a-text-bold'})):
 		li[str((page-1)*10 + (j + 1))]['link'] = row['href']
 
-def alternates(pid):
-	global li
+def alternates(pid, li):
 	#Extracting Alternatives!
 	url = "http://www.amazon.in/dp/" + pid
 	soup = 	make_soup(url)
@@ -132,11 +125,10 @@ def alternates(pid):
 	li['domain'] ='www.amazon.in'
 
 def doit(pid):
-	extract_text(pid)
-	global li
-	li['_id'] = pid
-	alternates(pid)
-	inserted_review = db.reviews.insert_one(li).inserted_id
-	i = 0
 	li = {}
+	li['i'] = 0
+	extract_text(pid, li)
+	li['_id'] = pid
+	alternates(pid, li)
+	inserted_review = db.reviews.insert_one(li).inserted_id
 	assert(inserted_review == pid)

@@ -6,14 +6,13 @@ from datetime import datetime
 from util import get_price_range
 snapdeal_link = "http://www.snapdeal.com/product/%s/%s/ratedreviews?page=%d&sortBy=HELPFUL&ratings=1,2,3,4,5#defRevPDP"
 from tornado import ioloop, httpclient
+import functools
 
 
 client = MongoClient('mongodb://localhost:27017/')
 
 db = client.revmine_2
 
-i = 0
-li = {}
 
 
 def main(pid, product_name, domain):
@@ -21,23 +20,21 @@ def main(pid, product_name, domain):
 		doit(pid, product_name)
 
 
-def extract_text(pid, product_name):
+def extract_text(pid, product_name, li):
 	http_client = httpclient.AsyncHTTPClient()
 	for page in range(1,6):
 		url_ = snapdeal_link % (product_name, pid, page)
 		print url_
-		global i
-		i+=1
-		http_client.fetch(url_, handler)
+		li['i']+=1
+		cb = functools.partial(handler, li)
+		http_client.fetch(url_, cb)
 	ioloop.IOLoop.instance().start()
 
-def handler(response):
+def handler(li, response):
 	if response.code != 200:
 		return
-	global i
-	global li
-	i -= 1
-	if i == 0:
+	li['i'] -= 1
+	if li['i'] == 0:
 		ioloop.IOLoop.instance().stop()
 	soup = BeautifulSoup(response.body)
 
@@ -52,8 +49,7 @@ def handler(response):
 
 
 
-def alternates(product_name, pid):
-	global li
+def alternates(product_name, pid, li):
 	related_products = []
 	try:
 		response = requests.get("http://www.snapdeal.com/product/%s/%s/"%(product_name,pid))
@@ -117,11 +113,10 @@ def alternates(product_name, pid):
 
 
 def doit(pid, product_name):
-	extract_text(pid, product_name)
-	print 'extraction done?'
-	global li
-	alternates(product_name, pid)
-	inserted_review = db.reviews.insert_one(li).inserted_id
-	i = 0
 	li = {}
+	li['i'] = 0
+	extract_text(pid, product_name, li)
+	print 'extraction done?'
+	alternates(product_name, pid,li)
+	inserted_review = db.reviews.insert_one(li).inserted_id
 	assert(inserted_review == pid)
