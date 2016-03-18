@@ -15,7 +15,6 @@ db = client.revmine_2
 i = 0
 li = {}
 count = 0
-http_client = httpclient.AsyncHTTPClient()
 
 
 def main(pid, product_name, domain):
@@ -24,6 +23,7 @@ def main(pid, product_name, domain):
 
 
 def extract_text(pid, product_name):
+	http_client = httpclient.AsyncHTTPClient()
 	for page in range(1,6):
 		url_ = snapdeal_link % (product_name, pid, page)
 		print url_
@@ -126,8 +126,8 @@ def doit(pid, product_name):
 	global li
 	li['count'] = count
 	alternates(product_name, pid)
-	from pprint import pprint
-	pprint(li)
-	pprint(li['count'])
 	inserted_review = db.reviews.insert_one(li).inserted_id
+	count = 0
+	i = 0
+	li = {}
 	assert(inserted_review == pid)

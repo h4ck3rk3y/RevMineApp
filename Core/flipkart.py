@@ -14,16 +14,15 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client.revmine_2
 
 i = 0
-li = {}
 count = 0
-http_client = httpclient.AsyncHTTPClient()
-
+li = {}
 
 def main(pid, product_name, domain):
 	if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
 		doit(pid, product_name)
 
 def extract_text(pid, product_name):
+	http_client = httpclient.AsyncHTTPClient()
 	for page in range(0,5):
 		url_ = flipkart_link % (product_name, pid, page*10)
 		print url_
@@ -51,8 +50,6 @@ def handler(response):
 	for j, row in enumerate(soup('span', {'class': 'review-text'})):
 		li[str((page)*10 + (j + 1))] = {}
 		count = count + 1
-		print count
-		print str((page)*10 + (j + 1))
 		li[str((page)*10 + (j + 1))]['text'] = row.text
 
 	for j, row in enumerate(soup('a',text='Permalink')):
@@ -152,8 +149,8 @@ def doit(pid, product_name):
 	global li
 	li['count'] = count
 	alternates(product_name, pid)
-	from pprint import pprint
-	# pprint(li)
-	pprint(li['count'])
 	inserted_review = db.reviews.insert_one(li).inserted_id
+	count = 0
+	i = 0
+	li = {}
 	assert(inserted_review == pid)

@@ -18,7 +18,6 @@ recom = db.recom
 i = 0
 li = {}
 count = 0
-http_client = httpclient.AsyncHTTPClient()
 
 def get_details(all_products_url):
 
@@ -55,6 +54,7 @@ def main(pid, domain):
 		doit(pid)
 
 def extract_text(pid):
+	http_client = httpclient.AsyncHTTPClient()
 	for page in range(1,6):
 		url_ = amazon_link % (pid, page)
 		print url_
@@ -136,13 +136,13 @@ def alternates(pid):
 
 def doit(pid):
 	extract_text(pid)
-	print 'extraction done?'
 	global count
 	global li
+	li['_id'] = pid
 	li['count'] = count
 	alternates(pid)
-	from pprint import pprint
-	pprint(li)
-	pprint(li['count'])
 	inserted_review = db.reviews.insert_one(li).inserted_id
+	count = 0
+	i = 0
+	li = {}
 	assert(inserted_review == pid)
