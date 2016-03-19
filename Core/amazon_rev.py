@@ -49,11 +49,12 @@ def main(pid, domain):
 	if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
 		doit(pid)
 
-def extract_text(pid, i, li):
+def extract_text(pid, li):
 	http_client = httpclient.AsyncHTTPClient()
 	for page in range(1,6):
 		url_ = amazon_link % (pid, page)
 		li['i'] += 1
+		print url_
 		cb = functools.partial(handler, li)
 		http_client.fetch(url_, cb)
 	ioloop.IOLoop.instance().start()
@@ -63,6 +64,7 @@ def handler(li, response):
 	if response.code != 200:
 		return
 	li['i'] -= 1
+	print li['i']
 	if li['i'] == 0:
 		ioloop.IOLoop.instance().stop()
 	soup = BeautifulSoup(response.body)
@@ -81,6 +83,7 @@ def handler(li, response):
 def alternates(pid, li):
 	#Extracting Alternatives!
 	url = "http://www.amazon.in/dp/" + pid
+	print url
 	soup = 	make_soup(url)
 	spans = soup.findAll('span',{'class': 'a-list-item'})
 	for span in spans:
@@ -131,4 +134,3 @@ def doit(pid):
 	li['_id'] = pid
 	alternates(pid, li)
 	inserted_review = db.reviews.insert_one(li).inserted_id
-	assert(inserted_review == pid)
