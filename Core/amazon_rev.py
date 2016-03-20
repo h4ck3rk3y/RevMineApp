@@ -4,17 +4,16 @@ from pymongo import MongoClient
 import re
 from datetime import datetime
 from util import get_price_range,make_soup
+from tornado import ioloop, httpclient
+import functools
 
 amazon_link = "http://www.amazon.in/product-reviews/%s?sortBy=helpful&pageNumber=%d"
 
-
 client = MongoClient('mongodb://localhost:27017/')
-
 db = client.revmine_2
 reviews = db.reviews
 done = db.done
 recom = db.recom
-
 
 def get_details(all_products_url):
 
@@ -27,6 +26,7 @@ def get_details(all_products_url):
 			name = i.find_all('a',{'class':"a-link-normal s-access-detail-page  a-text-normal"})
 			cost = i.find_all('span',{'class':'a-size-base a-color-price s-price a-text-bold'})
 			stars = i.find_all('span',{'class':"a-icon-alt"})
+
 			image = i.find_all('img')
 			product = {}
 			product['name'] = name[0]['title']
@@ -36,7 +36,7 @@ def get_details(all_products_url):
 			if len(cost) == 0:
 				continue
 			product['price'] = float(cost[-1].text.strip().replace(",",""))
-			product['rating'] = float(stars[0].text.rstrip(" out of 5 stars"))
+			product['rating'] = float(stars[0].text.split()[0])
 			product['value'] = float(product['price'])/float(product['rating'])
 			product['image'] = image[0]['src']
 			related_products.append(product)
@@ -49,35 +49,41 @@ def main(pid, domain):
 	if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
 		doit(pid)
 
-def extract_text(li):
-	count = 0
+def extract_text(pid, li):
+	http_client = httpclient.AsyncHTTPClient()
 	for page in range(1,6):
-		# Page 1 soup!
-		url_ = amazon_link % (li["_id"], page)
-		print "Trying " + url_ + " now!"
-		try:
-			response = requests.get(url_)
-			if response.status_code==200:
-				soup = BeautifulSoup(response.text)
-			else:
-				continue
-		except:
-			print 'continued'
-			continue
+		url_ = amazon_link % (pid, page)
+		li['i'] += 1
+		print url_
+		cb = functools.partial(handler, li)
+		http_client.fetch(url_, cb)
+	ioloop.IOLoop.instance().start()
 
-		li['title'] = soup('span', {'class': 'a-text-ellipsis'})[0].a.text
 
-		# will scrape reviews' text
-		for j, row in enumerate(soup('span', {'class': 'review-text'})):
-			li[str((page-1)*10 + (j + 1))] = {}
-			li[str((page-1)*10 + (j + 1))]['text'] = row.text
-			count +=1
+def handler(li, response):
+	if response.code != 200:
+		return
+	li['i'] -= 1
+	print li['i']
+	if li['i'] == 0:
+		ioloop.IOLoop.instance().stop()
+	soup = BeautifulSoup(response.body)
+	# will scrape reviews' text
+	li['title'] = soup('span', {'class': 'a-text-ellipsis'})[0].a.text
+	p = re.compile('pageNumber=(\d+)')
+	page = int(re.findall(p, response.effective_url)[0])
 
-		for j, row in enumerate(soup('a', {'class': 'a-size-base a-link-normal review-title a-color-base a-text-bold'})):
-			li[str((page-1)*10 + (j + 1))]['link'] = row['href']
-	li['count'] = count
+	for j, row in enumerate(soup('span', {'class': 'review-text'})):
+		li[str((page-1)*10 + (j + 1))] = {}
+		li[str((page-1)*10 + (j + 1))]['text'] = row.text
+
+	for j, row in enumerate(soup('a', {'class': 'a-size-base a-link-normal review-title a-color-base a-text-bold'})):
+		li[str((page-1)*10 + (j + 1))]['link'] = row['href']
+
+def alternates(pid, li):
 	#Extracting Alternatives!
-	url = "http://www.amazon.in/dp/" + li['_id']
+	url = "http://www.amazon.in/dp/" + pid
+	print url
 	soup = 	make_soup(url)
 	spans = soup.findAll('span',{'class': 'a-list-item'})
 	for span in spans:
@@ -120,15 +126,11 @@ def extract_text(li):
 	li['related_products'] = sorted_products[:10]
 	li['category'] = category
 	li['domain'] ='www.amazon.in'
-	return li
 
 def doit(pid):
-
-	# picking an object from the queue
-	product_asin = pid
 	li = {}
-	li["_id"] = product_asin
-	li = extract_text(li)
-
-	inserted_review = reviews.insert_one(li).inserted_id
-	assert(inserted_review == product_asin)
+	li['i'] = 0
+	extract_text(pid, li)
+	li['_id'] = pid
+	alternates(pid, li)
+	inserted_review = db.reviews.insert_one(li).inserted_id

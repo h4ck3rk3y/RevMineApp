@@ -5,44 +5,52 @@ import re
 from datetime import datetime
 from util import get_price_range
 snapdeal_link = "http://www.snapdeal.com/product/%s/%s/ratedreviews?page=%d&sortBy=HELPFUL&ratings=1,2,3,4,5#defRevPDP"
+from tornado import ioloop, httpclient
+import functools
 
 
 client = MongoClient('mongodb://localhost:27017/')
 
 db = client.revmine_2
 
+
+
 def main(pid, product_name, domain):
 	if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
 		doit(pid, product_name)
 
-li = {}
-def extract_text(pid, product_name):
-	li = {}
-	count = 0
+
+def extract_text(pid, product_name, li):
+	http_client = httpclient.AsyncHTTPClient()
 	for page in range(1,6):
 		url_ = snapdeal_link % (product_name, pid, page)
-		try:
-			response = requests.get(url_)
-			if response.status_code == 200:
-				print url_
-				soup = BeautifulSoup(response.text)
-			else:
-				continue
-		except:
-			continue
-			print 'something awful just happened'
+		print url_
+		li['i']+=1
+		cb = functools.partial(handler, li)
+		http_client.fetch(url_, cb)
+	ioloop.IOLoop.instance().start()
 
-		li['title'] = soup('span', {'class': 'section-head customer_review_tab'})[0].text
-		# will scrape reviews' text
-		for j, row in enumerate(soup('div', {'class': 'user-review'})[2:]):
-			count +=1
-			li[str((page-1)*10 + (j + 1))] = {}
-			li[str((page-1)*10 + (j + 1))]['text'] = row.p.text
-			li[str((page-1)*10 + (j + 1))]['link'] = url_
+def handler(li, response):
+	if response.code != 200:
+		return
+	li['i'] -= 1
+	if li['i'] == 0:
+		ioloop.IOLoop.instance().stop()
+	soup = BeautifulSoup(response.body)
 
-	li['count'] = count
+	p = re.compile('page=(\d+)')
+	page = int(re.findall(p, response.effective_url)[0])
+	li['title'] = soup('span', {'class': 'section-head customer_review_tab'})[0].text
+	# will scrape reviews' text
+	for j, row in enumerate(soup('div', {'class': 'user-review'})[2:]):
+		li[str((page-1)*10 + (j + 1))] = {}
+		li[str((page-1)*10 + (j + 1))]['text'] = row.p.text
+		li[str((page-1)*10 + (j + 1))]['link'] = response.effective_url
+
+
+
+def alternates(product_name, pid, li):
 	related_products = []
-
 	try:
 		response = requests.get("http://www.snapdeal.com/product/%s/%s/"%(product_name,pid))
 		new_soup = BeautifulSoup(response.text)
@@ -102,11 +110,13 @@ def extract_text(pid, product_name):
 
 	li['domain'] = 'www.snapdeal.com'
 	li['_id'] = pid
-	return li
 
 
 def doit(pid, product_name):
-
-	list_of_reviews = extract_text(pid, product_name)
-	inserted_review = db.reviews.insert_one(list_of_reviews).inserted_id
+	li = {}
+	li['i'] = 0
+	extract_text(pid, product_name, li)
+	print 'extraction done?'
+	alternates(product_name, pid,li)
+	inserted_review = db.reviews.insert_one(li).inserted_id
 	assert(inserted_review == pid)

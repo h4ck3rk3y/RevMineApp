@@ -4,46 +4,55 @@ from pymongo import MongoClient
 import re
 from datetime import datetime
 from util import make_soup
+from tornado import ioloop, httpclient
+import functools
 
 flipkart_link = "http://www.flipkart.com/%s/product-reviews/%s?type=top&start=%d"
-
 
 client = MongoClient('mongodb://localhost:27017/')
 
 db = client.revmine_2
 
+
 def main(pid, product_name, domain):
 	if db.reviews.find({'_id':pid, 'domain': domain}).count()==0:
 		doit(pid, product_name)
 
-def extract_text(pid, product_name):
-	li = {}
-	count = 0
+def extract_text(pid, product_name, li):
+	http_client = httpclient.AsyncHTTPClient()
 	for page in range(0,5):
 		url_ = flipkart_link % (product_name, pid, page*10)
 		print url_
-		try:
-			response = requests.get(url_)
-			if response.status_code == 200:
-				soup = BeautifulSoup(response.text)
-			else:
-				continue
-		except:
-			print 'something awful just happened'
+		li['i'] += 1
+		cb = functools.partial(handler, li)
+		http_client.fetch(url_, cb)
+	ioloop.IOLoop.instance().start()
 
-		li['title'] = soup('img', {'onload':'img_onload(this);'})[0]["alt"]
+def handler(li, response):
+	if response.code != 200:
+		return
+	li['i'] -= 1
+	if li['i'] == 0:
+		ioloop.IOLoop.instance().stop()
 
-		for j, row in enumerate(soup('span', {'class': 'review-text'})):
-			li[str((page)*10 + (j + 1))] = {}
-			count = count + 1
-			li[str((page)*10 + (j + 1))]['text'] = row.text
+	soup = BeautifulSoup(response.body)
 
-		for j, row in enumerate(soup('a',text='Permalink')):
-			li[str((page)*10 + (j + 1))]['link'] = row['href']
+	p = re.compile('start=(\d+)')
+	page = int(re.findall(p, response.effective_url)[0])/10
 
-	li['count'] = count
-	#Extracting Alternatives!
-	url = "http://www.flipkart.com/" + product_name + "/p/" + pid
+	li['title'] = soup('img', {'onload':'img_onload(this);'})[0]["alt"]
+	for j, row in enumerate(soup('span', {'class': 'review-text'})):
+		li[str((page)*10 + (j + 1))] = {}
+		li[str((page)*10 + (j + 1))]['text'] = row.text
+
+	for j, row in enumerate(soup('a',text='Permalink')):
+		li[str((page)*10 + (j + 1))]['link'] = row['href']
+
+
+#Extracting Alternatives!
+def alternates(product_name, pid, li):
+	url = "http://www.flipkart.com/" + product_name + "/p/" + pid.lower()
+	print url
 	soup = make_soup(url)
 
 	breadcrumb = soup.findAll('div',{'class':'breadcrumb-wrap line'})
@@ -124,10 +133,12 @@ def extract_text(pid, product_name):
 	li['high-price'] = high_price
 	li['related_products'] = sorted_products[:10]
 
-	return li
 
 def doit(pid, product_name):
-
-	list_of_reviews = extract_text(pid, product_name)
-	inserted_review = db.reviews.insert_one(list_of_reviews).inserted_id
+	li = {}
+	li['i'] = 0
+	extract_text(pid, product_name, li)
+	print 'extraction done?'
+	alternates(product_name, pid, li)
+	inserted_review = db.reviews.insert_one(li).inserted_id
 	assert(inserted_review == pid)
