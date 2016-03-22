@@ -1,4 +1,5 @@
 import amazon_in
+import amazon_com
 import flipkart
 import snapdeal
 import nlp_dep
@@ -20,6 +21,8 @@ def justDoIt(domain,pid,product_name=None):
         elif 'flipkart' in domain:
             pid = pid.lower()
             flipkart.main(pid, product_name, domain)
+        elif 'amazon.com' in domain:
+        	amazon_com.main(pid, domain)
 
         print datetime.now(),
         print ':reviews gained/exist'
