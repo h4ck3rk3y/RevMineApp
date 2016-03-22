@@ -35,8 +35,12 @@ def get_details(all_products_url):
 			product['link'] = name[0]['href']
 			if len(cost) == 0:
 				continue
-			product['price'] = float(cost[-1].text.strip().replace(",",""))
-			product['rating'] = float(stars[0].text.split()[0])
+			product['price'] = float(cost[-1].text.strip().replace(",","")[1:])
+			try:
+				product['rating'] = float(stars[0].text.split()[0])
+			except:
+				product['rating'] = float(stars[1].text.split()[0])
+			print product['rating']
 			product['value'] = float(product['price'])/float(product['rating'])
 			product['image'] = image[0]['src']
 			related_products.append(product)
