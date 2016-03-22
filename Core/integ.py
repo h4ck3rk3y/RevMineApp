@@ -1,4 +1,4 @@
-import amazon_rev
+import amazon_in
 import flipkart
 import snapdeal
 import nlp_dep
@@ -14,7 +14,7 @@ def justDoIt(domain,pid,product_name=None):
     try:
         print datetime.now()
         if 'amazon.in' in domain:
-            amazon_rev.main(pid, domain)
+            amazon_in.main(pid, domain)
         elif 'snapdeal.com' in domain:
             snapdeal.main(pid, product_name, domain)
         elif 'flipkart' in domain:
