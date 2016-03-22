@@ -17,7 +17,7 @@ def get_price_range(price, country="India"):
 			return (price-6000,price+6000)
 		if price >= 60000:
 			return (int(0.9*price),int(1.15*price))
-	else if country == "USA":
+	elif country == "USA":
 		return (max(0, float(price) - price/4.0), price + price/4.0)
 
 def make_soup(url):
