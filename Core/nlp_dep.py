@@ -3,17 +3,13 @@ from pymongo import MongoClient
 import nltk
 from nltk.tag.perceptron import PerceptronTagger
 import enchant
-from pprint import pprint
+from nltk.corpus import stopwords
+from nltk.corpus import wordnet as wn
+from nltk.corpus import sentiwordnet as swn
+
 eng_check = enchant.Dict("en_US")
 tagger = PerceptronTagger()
 tagset = None
-
-from nltk.corpus import stopwords
-from nltk.tag import pos_tag
-from nltk.corpus import wordnet as wn
-from nltk.corpus import sentiwordnet as swn
-import string
-from datetime import datetime
 
 client = MongoClient('mongodb://localhost:27017/')
 db = client.revmine
@@ -29,14 +25,17 @@ stop.append('plus')
 stop.append('thanks')
 stop.append('things')
 
+
 def strip_proppers_POS(text):
     tokens = nltk.word_tokenize(text)
     tagged = nltk.tag._pos_tag(tokens,tagset, tagger)
     res = []
-    words = [(word,pos) for word,pos in tagged if (pos[0]=="N" or pos[0]=="J") and len(word)>3 and word not in stop and eng_check.check(word) and not any(ccc.isdigit() for ccc in word)]
     word_serial = {}
-    for w in range(0,len(words),1):
-        word_serial[words[w][0]] = w
+    for w in range(0,len(tagged),1):
+        word_serial[tagged[w][0]] = w
+
+    words = [(word,pos) for word,pos in tagged if (pos[0]=="N" or pos[0]=="J") and len(word)>3 and word not in stop and eng_check.check(word) and not any(ccc.isdigit() for ccc in word)]
+
     for a in words:
         flag = 0
         if a[1][0] == "J":
@@ -50,13 +49,13 @@ def strip_proppers_POS(text):
                         minDist = dist
                         nearestNoun = noun
                         flag = 1
-            if flag==1:
+            if flag == 1:
                 if minDist > 0.0:
-                    res.append((adj,noun,(1/pow(minDist,2))))
+                    res.append((adj, nearestNoun, (1/pow(minDist, 2))))
     return res
 
-def doit(pid, domain):
 
+def doit(pid, domain):
     arr = []
     revs = []
 
