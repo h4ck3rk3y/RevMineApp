@@ -50,10 +50,11 @@ def strip_proppers_POS(text):
 	tokens = nltk.word_tokenize(text)
 	tagged = nltk.tag._pos_tag(tokens,tagset, tagger)
 	res = []
-	words = [(word,pos) for word,pos in tagged if (pos[0]=="N" or pos[0]=="J") and len(word)>3 and word not in stop and not p.singular_noun(word) and eng_check.check(word) and not any(ccc.isdigit() for ccc in word)]
 	word_serial = {}
-	for w in range(0,len(words),1):
-		word_serial[words[w][0]] = w
+	for w in range(0,len(tagged),1):
+		word_serial[tagged[w][0]] = w
+	words = [(word,pos) for word,pos in tagged if (pos[0] == "N" or pos[0]=="J") and len(word)>3 and word not in stop and not p.singular_noun(word) and eng_check.check(word) and not any(ccc.isdigit() for ccc in word)]
+
 	for a in words:
 		flag = 0
 		if a[1][0] == "J":
@@ -69,7 +70,7 @@ def strip_proppers_POS(text):
 						flag = 1
 			if flag==1:
 				if minDist > 0.0:
-					res.append((adj,noun,(1/pow(minDist,2))))
+					res.append((adj,nearestNoun,(1/pow(minDist,2))))
 	return res
 
 def doit(pid, domain):
@@ -105,7 +106,7 @@ def doit(pid, domain):
 	for t in terms:
 		if len(nltk.word_tokenize(t))==2:
 			bigrams.append(i for i in t)
-	
+
 	for yolo in range(0,len(arr),1):
 		for i in arr[yolo]:
 			adj = i[0]
@@ -137,6 +138,7 @@ def doit(pid, domain):
 				else:
 					score += adj_synset[0].pos_score()
 					neg_score += adj_synset[0].neg_score()
+			
 				if float(score) > 0.0:
 					if noun not in noun_scores:
 						noun_scores[noun] = [dist*score,1]
@@ -159,8 +161,14 @@ def doit(pid, domain):
 								start = st+1
 								break
 						selectedPartOfReview = individualReview[start:min(len(individualReview),index+25)]
-						if {'snippet':selectedPartOfReview,'link':individualLink,'topic':noun} not in revsSelected:
-							revsSelected.append({'snippet':selectedPartOfReview,'link':individualLink,'topic':noun})
+						if score > neg_score:
+							review_score = score
+							sentiment = 'positive'
+						else:
+							review_score = neg_score
+							sentiment = 'negative'
+						if {'snippet':selectedPartOfReview,'link':individualLink,'topic':noun, 'review_score':review_score} not in revsSelected:
+							revsSelected.append({'snippet':selectedPartOfReview,'link':individualLink,'topic':noun, 'sentiment':sentiment, 'review_score':review_score})
 					except:
 						revsSelected.append({'topic':adj+" "+noun,'link':"www.google.com"})
 	noun_scores = sorted(noun_scores.items(),key=lambda x:x[1][1],reverse=True)
@@ -192,11 +200,30 @@ def doit(pid, domain):
 	final_sentences = []
 	topics_selected = []
 	for i in revsSelected:
-		if i['topic'] in topics and i['topic'] not in topics_selected:
+		if i['topic'] in topics and (i['topic'],i['sentiment']) not in topics_selected:
 			final_sentences.append(i)
-			topics_selected.append(i['topic'])
+			topics_selected.append((i['topic'],i['sentiment']))
 
-	result['sentences'] = {x['topic']:{'link': x['link'],'snippet': x['snippet']} for x in final_sentences}
-	#pprint(result)
+	indiahacks = {}
+	for x in final_sentences:
+		if x['topic'] not in indiahacks:
+			a = {}
+			a[x['sentiment']] = {'link': x['link'],'snippet': x['snippet']}
+			indiahacks[x['topic']] = a
+		else:
+			a = {}
+			a[x['sentiment']] = {'link': x['link'],'snippet': x['snippet']}
+			if x['sentiment'] not in indiahacks[x['topic']]:
+				indiahacks[x['topic']][x['sentiment']] = {'link': x['link'],'snippet': x['snippet'] }
+	for x in indiahacks:
+		if 'positive' not in indiahacks[x]:
+			 indiahacks[x]['positive'] = indiahacks[x]['positive'] 
+		if 'negative' not in indiahacks[x]:
+			 indiahacks[x]['negative'] = indiahacks[x]['positive'] 
+		
+
+	result['sentences'] = indiahacks		
 	result_db.insert(result)
 	return True
+
+#doit('B011RG8SOU','www.amazon.in')
