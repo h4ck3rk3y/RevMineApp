@@ -2,6 +2,8 @@
 
 Make that buying decision.
 
+If you wish to download the extension, find it on the chrome store [here](http://bit.ly/revmine).
+
 ## Components
 
 #Core
